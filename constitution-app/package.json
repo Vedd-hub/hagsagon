@@ -2,7 +2,7 @@
   "name": "constitution-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Vedd.github.io/IIIT-Hackathon",
+  "homepage": "https://Vedd.github.io/IIITM-Hackathon",
   "dependencies": {
     "@barba/core": "^2.10.3",
     "@react-spring/three": "^9.7.5",
