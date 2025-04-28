@@ -2,6 +2,7 @@
   "name": "constitution-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Vedd.github.io/IIITM-Hackathon",
   "dependencies": {
     "@barba/core": "^2.10.3",
     "@react-spring/three": "^9.7.5",
@@ -30,7 +31,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
