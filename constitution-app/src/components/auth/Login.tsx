@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const QuillIcon = () => (
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-4">
@@ -14,14 +15,28 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      navigate('/main');
-    } else {
+    
+    if (!email || !password) {
       setError('Please enter both email and password');
+      return;
+    }
+
+    try {
+      setError('');
+      setLoading(true);
+      await login(email, password);
+      navigate('/main');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to sign in. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -114,6 +129,7 @@ const Login: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                 placeholder="Email address"
+                disabled={loading}
               />
             </div>
             <div>
@@ -130,6 +146,7 @@ const Login: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                 placeholder="Password"
+                disabled={loading}
               />
             </div>
           </div>
@@ -140,6 +157,7 @@ const Login: React.FC = () => {
                 name="remember-me"
                 type="checkbox"
                 className="h-4 w-4 text-accent focus:ring-accent border-yellow-300 rounded"
+                disabled={loading}
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-yellow-900">
                 Remember me
@@ -150,6 +168,7 @@ const Login: React.FC = () => {
                 type="button"
                 onClick={handleForgotPassword}
                 className="font-medium text-accent hover:text-accent/80 bg-transparent border-none cursor-pointer underline"
+                disabled={loading}
               >
                 Forgot your password?
               </button>
@@ -161,8 +180,9 @@ const Login: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
+              disabled={loading}
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </motion.button>
           </div>
         </form>
