@@ -32,10 +32,9 @@ const LandingPage: React.FC = () => {
           className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center"
         >
           <div className="text-2xl font-serif font-bold text-white tracking-wide flex items-center">
-            <span className="text-[#f5e1a0]">C</span>
-            <span className="text-white">onstitution</span>
-            <span className="text-[#f5e1a0] ml-2">P</span>
-            <span className="text-white">roject</span>
+            <span className="text-[#f5e1a0]">L</span>
+            <span className="text-white">ex</span>
+            <span className="text-[#f5e1a0]">IQ</span>
           </div>
           
           <div className="hidden md:flex space-x-8 text-white">

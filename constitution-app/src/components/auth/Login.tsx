@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -17,7 +17,15 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, currentUser } = useAuth();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to main page
+    if (currentUser) {
+      console.log("User already logged in, redirecting to main page");
+      navigate('/main');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +38,15 @@ const Login: React.FC = () => {
     try {
       setError('');
       setLoading(true);
-      await login(email, password);
-      navigate('/main');
+      console.log("Submitting login form...");
+      const user = await login(email, password);
+      console.log("Login successful, user:", user.email);
+      console.log("Redirecting to main page...");
+      
+      // Small delay to ensure Firebase auth state is updated
+      setTimeout(() => {
+        navigate('/main');
+      }, 500);
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');
@@ -90,11 +105,13 @@ const Login: React.FC = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
+          className="text-center"
         >
           <QuillIcon />
+          <h2 className="text-3xl font-bold text-amber-800 font-serif">LexIQ</h2>
         </motion.div>
         <div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-primary font-serif drop-shadow-md">
+          <h2 className="mt-2 text-center text-2xl font-extrabold text-primary font-serif drop-shadow-md">
             Sign in to your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-700">

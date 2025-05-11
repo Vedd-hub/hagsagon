@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -18,8 +18,17 @@ const SignUp: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, currentUser } = useAuth();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to main page
+    if (currentUser) {
+      console.log("User already logged in, redirecting to main page");
+      navigate('/main');
+    }
+  }, [currentUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +44,15 @@ const SignUp: React.FC = () => {
     try {
       setError('');
       setLoading(true);
-      await signup(email, password, name);
-      navigate('/login');
+      console.log("Submitting signup form...");
+      const user = await signup(email, password, name);
+      console.log("Signup successful, user:", user.email);
+      setSignupSuccess(true);
+      
+      // Navigate to login after a delay to allow time for registration
+      setTimeout(() => {
+        navigate('/main');
+      }, 1000);
     } catch (err: any) {
       console.error('Signup error:', err);
       setError(err.message || 'Failed to create an account');
@@ -91,11 +107,13 @@ const SignUp: React.FC = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
+          className="text-center"
         >
           <QuillIcon />
+          <h2 className="text-3xl font-bold text-amber-800 font-serif">LexIQ</h2>
         </motion.div>
         <div>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-primary font-serif drop-shadow-md">
+          <h2 className="mt-2 text-center text-2xl font-extrabold text-primary font-serif drop-shadow-md">
             Create a new account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-700">
@@ -105,98 +123,119 @@ const SignUp: React.FC = () => {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-sm"
+        
+        {signupSuccess ? (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-green-100 border border-green-400 text-green-700 px-4 py-6 rounded shadow-sm text-center"
+          >
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="text-4xl mb-3"
             >
-              {error}
+              ✅
             </motion.div>
-          )}
-          <div className="space-y-4 rounded-md">
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
-                placeholder="Full Name"
-                disabled={loading}
-              />
+            <h3 className="font-bold text-lg mb-2">Account Created Successfully!</h3>
+            <p>You will be redirected to the main page shortly...</p>
+          </motion.div>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+            <div className="space-y-4 rounded-md">
+              <div>
+                <label htmlFor="name" className="sr-only">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  placeholder="Full Name"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="email-address"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  placeholder="Email address"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  placeholder="Password"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label htmlFor="confirm-password" className="sr-only">
+                  Confirm Password
+                </label>
+                <input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  placeholder="Confirm Password"
+                  disabled={loading}
+                />
+              </div>
             </div>
             <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
-                placeholder="Email address"
+              <motion.button
+                whileHover={{ scale: 1.04, boxShadow: '0 0 8px #C19A6B' }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
                 disabled={loading}
-              />
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </motion.button>
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
-                placeholder="Password"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirm-password" className="sr-only">
-                Confirm Password
-              </label>
-              <input
-                id="confirm-password"
-                name="confirm-password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
-                placeholder="Confirm Password"
-                disabled={loading}
-              />
-            </div>
-          </div>
-          <div>
-            <motion.button
-              whileHover={{ scale: 1.04, boxShadow: '0 0 8px #C19A6B' }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
-              disabled={loading}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </motion.button>
-          </div>
-        </form>
+          </form>
+        )}
+        
         <div className="mt-4 text-center">
           <Link to="/" className="font-medium text-accent hover:text-accent/80 text-sm underline">
             Back to Home

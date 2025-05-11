@@ -7,8 +7,8 @@ interface AuthContextProps {
   currentUser: FirebaseUser | null;
   userData: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, displayName?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<FirebaseUser>;
+  signup: (email: string, password: string, displayName?: string) => Promise<FirebaseUser>;
   logout: () => Promise<void>;
 }
 
@@ -32,12 +32,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("AuthProvider initialized");
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("Auth state changed:", user?.email);
       setCurrentUser(user);
+      
       if (user) {
         // Fetch additional user data from Firestore
         try {
           const userDetails = await getUserData(user.uid);
+          console.log("User details fetched:", userDetails);
           setUserData(userDetails);
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -45,6 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         setUserData(null);
       }
+      
       setLoading(false);
     });
 
@@ -52,8 +58,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    console.log("Login attempt for:", email);
     try {
-      await loginUser(email, password);
+      const result = await loginUser(email, password);
+      console.log("Login successful:", result.user.email);
+      return result.user;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -61,8 +70,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signup = async (email: string, password: string, displayName?: string) => {
+    console.log("Signup attempt for:", email);
     try {
-      await registerUser(email, password, displayName);
+      const result = await registerUser(email, password, displayName);
+      console.log("Signup successful:", result.user.email);
+      return result.user;
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
@@ -72,6 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     try {
       await logoutUser();
+      console.log("Logout successful");
     } catch (error) {
       console.error('Logout error:', error);
       throw error;
@@ -87,9 +100,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout
   };
 
+  console.log("AuthContext current state:", { 
+    hasUser: !!currentUser, 
+    hasUserData: !!userData, 
+    isLoading: loading 
+  });
+
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 } 
