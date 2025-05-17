@@ -112,12 +112,37 @@ const LogoutIcon = () => (
   </svg>
 );
 
+interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  date: string;
+  isNew: boolean;
+}
+
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, userData, logout } = useAuth();
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [showAnnouncements, setShowAnnouncements] = useState(false);
+  const [unreadAnnouncements, setUnreadAnnouncements] = useState(3);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = React.useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Sample announcements data
+  const [announcements] = useState<Announcement[]>([
+    { id: 1, title: 'New Feature: Daily Quizzes', content: 'Test your knowledge with our new daily quiz feature!', date: '2025-05-18', isNew: true },
+    { id: 2, title: 'Maintenance Notice', content: 'Scheduled maintenance on May 20th, 2025 from 2:00 AM to 4:00 AM IST.', date: '2025-05-17', isNew: true },
+    { id: 3, title: 'Welcome to LexIQ!', content: 'Thank you for joining LexIQ. Start your learning journey today!', date: '2025-05-15', isNew: false },
+  ]);
+  
+  const toggleAnnouncements = () => {
+    setShowAnnouncements(!showAnnouncements);
+    if (showAnnouncements === false && unreadAnnouncements > 0) {
+      setUnreadAnnouncements(0);
+    }
+  };
   
   useEffect(() => {
     // Debugging
@@ -233,19 +258,42 @@ const MainPage: React.FC = () => {
         }}
       />
 
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <div className="w-20 lg:w-64 bg-black/40 backdrop-blur-md text-white flex flex-col border-r border-[#f5e1a0]/20">
-          <div className="p-4 flex items-center justify-center lg:justify-start font-serif">
+      <div className="flex flex-col md:flex-row h-screen">
+        {/* Mobile Header - Only visible on small screens */}
+        <div className="md:hidden bg-black/40 backdrop-blur-md p-4 border-b border-[#f5e1a0]/20 flex justify-between items-center">
+          <span className="text-xl font-bold text-[#f5e1a0] font-serif">LexIQ</span>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="text-white p-2 rounded-md hover:bg-white/10"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+        
+        {/* Sidebar - Hidden on mobile unless menu is open */}
+        <div className={`${mobileMenuOpen ? 'block' : 'hidden'} md:block w-full md:w-20 lg:w-64 bg-black/40 backdrop-blur-md text-white flex flex-col border-r border-[#f5e1a0]/20 ${mobileMenuOpen ? 'absolute z-50 h-screen' : ''}`}>
+          <div className="p-4 hidden md:flex items-center justify-center lg:justify-start font-serif">
             <span className="hidden lg:inline text-xl font-bold text-[#f5e1a0]">LexIQ</span>
-            <span className="lg:hidden text-xl font-bold text-[#f5e1a0]">LQ</span>
+            <span className="lg:hidden md:inline text-xl font-bold text-[#f5e1a0]">LQ</span>
           </div>
           
           <nav className="flex-1 overflow-y-auto">
             <ul className="space-y-2 p-2">
               <li>
                 <button 
-                  onClick={() => setActiveSection('dashboard')}
+                  onClick={() => {
+                    setActiveSection('dashboard');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'dashboard' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <BookIcon />
@@ -254,7 +302,10 @@ const MainPage: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => setActiveSection('learn')}
+                  onClick={() => {
+                    setActiveSection('learn');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'learn' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <BookIcon />
@@ -263,7 +314,10 @@ const MainPage: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => setActiveSection('quiz')}
+                  onClick={() => {
+                    setActiveSection('quiz');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'quiz' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <QuizIcon />
@@ -271,17 +325,14 @@ const MainPage: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => setActiveSection('announcements')}
-                  className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'announcements' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
-                >
-                  <AnnouncementIcon />
-                  <span className="ml-3 hidden lg:inline">Announcements</span>
-                </button>
+
               </li>
               <li>
                 <button 
-                  onClick={() => setActiveSection('games')}
+                  onClick={() => {
+                    setActiveSection('games');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'games' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <GameIcon />
@@ -290,7 +341,10 @@ const MainPage: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => setActiveSection('profile')}
+                  onClick={() => {
+                    setActiveSection('profile');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'profile' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <ProfileIcon />
@@ -299,7 +353,10 @@ const MainPage: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => setActiveSection('community')}
+                  onClick={() => {
+                    setActiveSection('community');
+                    setMobileMenuOpen(false);
+                  }}
                   className={`w-full flex items-center p-3 rounded-lg transition-colors ${activeSection === 'community' ? 'bg-[#f5e1a0]/20' : 'hover:bg-white/10'}`}
                 >
                   <CommunityIcon />
@@ -311,7 +368,10 @@ const MainPage: React.FC = () => {
           
           <div className="p-4">
             <button 
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setMobileMenuOpen(false);
+              }}
               className="w-full flex items-center p-3 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
             >
               <LogoutIcon />
@@ -322,27 +382,88 @@ const MainPage: React.FC = () => {
 
         {/* Main content area */}
         <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-          {/* Header */}
-          <div ref={headerRef} className="p-4 backdrop-blur-md bg-black/30 border-b border-[#f5e1a0]/20">
+          {/* Header - Hidden on mobile as we have a separate mobile header */}
+          <div ref={headerRef} className="hidden md:block p-4 backdrop-blur-md bg-black/30 border-b border-[#f5e1a0]/20">
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-serif font-bold text-white">
                 Welcome <span className="text-[#f5e1a0]">{userName}</span>
               </h1>
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <button className="text-white hover:text-[#f5e1a0] transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
+                  <button 
+                    onClick={toggleAnnouncements}
+                    className="relative p-2 text-white hover:text-[#f5e1a0] transition-colors rounded-full hover:bg-white/10"
+                    aria-label="Announcements"
+                  >
+                    <AnnouncementIcon />
+                    {unreadAnnouncements > 0 && (
+                      <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        {unreadAnnouncements}
+                      </span>
+                    )}
                   </button>
-                  <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                  
+                  {/* Announcements Dropdown */}
+                  {showAnnouncements && (
+                    <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-50">
+                      <div className="p-3 border-b border-gray-700 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-white">Announcements</h3>
+                        <button
+                          onClick={() => setShowAnnouncements(false)}
+                          className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
+                          aria-label="Close announcements"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {announcements.length > 0 ? (
+                          <ul className="divide-y divide-gray-700">
+                            {announcements.map((announcement) => (
+                              <li key={announcement.id} className="p-3 hover:bg-gray-700 transition-colors">
+                                <div className="flex items-start">
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                      <h4 className="font-medium text-white">{announcement.title}</h4>
+                                      {announcement.isNew && (
+                                        <span className="inline-block h-2 w-2 bg-red-500 rounded-full ml-2"></span>
+                                      )}
+                                    </div>
+                                    <p className="text-sm text-gray-300 mt-1">{announcement.content}</p>
+                                    <span className="text-xs text-gray-400 mt-1 block">{new Date(announcement.date).toLocaleDateString()}</span>
+                                  </div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="p-4 text-center text-gray-400">
+                            No announcements yet
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 border-t border-gray-700 text-center">
+                        <button 
+                          onClick={() => {
+                            setActiveSection('announcements');
+                            setShowAnnouncements(false);
+                          }} 
+                          className="text-sm text-blue-400 hover:underline"
+                        >
+                          View all announcements
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Content sections */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-4 md:p-6 overflow-y-auto">
             {activeSection === 'dashboard' && (
               <div className="space-y-6">
                 <motion.div 

@@ -16,16 +16,26 @@ const UserEngagementExample: React.FC = () => {
         try {
           let userProfile = await userService.getUserProfile(authUser.uid);
           
-          // If user profile doesn't exist, create one
+          // If user profile doesn't exist, create one with default values
           if (!userProfile) {
             await userService.createUserProfile({
-              username: authUser.displayName || 'User'
+              username: authUser.displayName || 'User',
+              level: 1, // Explicitly set level to 1
+              badges: [],
+              lexIQScore: 0,
+              dailyQuizStreak: 0,
+              chaptersCompleted: [],
+              gamesPlayed: 0,
+              dailyNotifications: true,
+              soundEffects: true
             });
             userProfile = await userService.getUserProfile(authUser.uid);
           }
           
-          // Update last login
-          await userService.updateLastLogin(authUser.uid);
+          // Update last login by updating the user profile
+          await userService.updateUserProfile(authUser.uid, {
+            lastLogin: Date.now()
+          });
           
           setUser(userProfile);
         } catch (err) {

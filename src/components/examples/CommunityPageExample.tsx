@@ -4,8 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services';
 import { UserProfile } from '../../models/UserProfile';
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase/config';
-import { useNavigate } from 'react-router-dom';
+import { db, auth } from '../../firebase/config';
+import { useNavigate, Link } from 'react-router-dom';
 
 // Performance optimization - reduce mock data size
 const mockUsers = [
@@ -122,12 +122,15 @@ const CommunityPageExample: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'chat' | 'leaderboard'>('chat');
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [users] = useState(mockUsers); // Remove unnecessary useState calls
+  const [users] = useState(mockUsers);
 
   // Redirect to login if not authenticated
   useEffect(() => {
+    console.log("CommunityPage: Auth state -", currentUser ? "Logged in" : "Not logged in");
+    
     if (!authLoading && !currentUser) {
-      navigate('/login');
+      console.log("CommunityPage: No authenticated user, redirecting to login");
+      navigate('/login', { state: { from: '/community' } });
     }
   }, [currentUser, authLoading, navigate]);
   
@@ -139,20 +142,30 @@ const CommunityPageExample: React.FC = () => {
       if (!currentUser?.uid || !mounted) return;
       
       try {
+        console.log("CommunityPage: Fetching user profile for UID:", currentUser.uid);
         const profile = await userService.getUserProfile(currentUser.uid);
         
         if (!profile && mounted) {
-          // Create basic profile
+          console.log("CommunityPage: No profile found, creating a new one");
+          // Create basic profile with ALL required fields
+          const now = Date.now();
           const newProfile = {
+            uid: currentUser.uid,
             username: currentUser.displayName || `User_${currentUser.uid.substring(0, 5)}`,
             email: currentUser.email || '',
+            role: "user" as "user" | "admin",
             level: 1,
             badges: [],
             chaptersCompleted: [],
             dailyQuizStreak: 0,
             gamesPlayed: 0,
             lexIQScore: 0,
-            lastLogin: Date.now()
+            lastLogin: now,
+            createdAt: now,
+            updatedAt: now,
+            dailyNotifications: true,
+            soundEffects: true,
+            profession: ''
           };
           
           await userService.createUserProfile(newProfile);
@@ -304,23 +317,55 @@ const CommunityPageExample: React.FC = () => {
     }
   };
   
-  // Simplified loading state
+  // Handle various states
   if (authLoading || (loading && currentUser)) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="inline-block w-10 h-10 border-4 border-[#f5e1a0]/30 border-t-[#f5e1a0] rounded-full animate-spin"></div>
+        <span className="ml-3 text-white">Loading community...</span>
       </div>
     );
   }
   
-  // Don't show auth required message, we'll redirect instead
+  if (error) {
+    return (
+      <div className="text-center text-white p-8">
+        <h2 className="text-2xl font-bold mb-4">Error Loading Community</h2>
+        <p className="mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-[#f5e1a0] text-[#0F172A] rounded hover:bg-[#f5e1a0]/80 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   if (!currentUser) {
-    return <div className="text-center p-4">Redirecting to login...</div>;
+    return (
+      <div className="text-center text-white p-8">
+        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+        <p className="mb-4">Please log in to access the community.</p>
+        <Link 
+          to="/login"
+          className="px-4 py-2 bg-[#f5e1a0] text-[#0F172A] rounded hover:bg-[#f5e1a0]/80 transition-colors inline-block"
+        >
+          Go to Login
+        </Link>
+      </div>
+    );
   }
 
   // Wait for profile
   if (!userProfile) {
-    return <div className="text-center p-4">Setting up your profile...</div>;
+    return (
+      <div className="text-center text-white p-8">
+        <h2 className="text-2xl font-bold mb-4">Setting Up Your Profile</h2>
+        <p className="mb-4">Please wait while we prepare your community experience...</p>
+        <div className="inline-block w-8 h-8 border-4 border-[#f5e1a0]/30 border-t-[#f5e1a0] rounded-full animate-spin mx-auto"></div>
+      </div>
+    );
   }
 
   // Simplified UI rendering with fewer animations for better performance
@@ -391,7 +436,7 @@ const CommunityPageExample: React.FC = () => {
                           posting ? 'animate-pulse' : ''
                         }`}
                       >
-                        {posting ? 'Posting...' : 'Post'}
+                        {posting ? 'Posting...' : `Post as ${userProfile?.username || currentUser?.displayName || 'User'}`}
                       </button>
                     </div>
                   </div>

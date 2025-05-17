@@ -7,6 +7,7 @@ import {
   userService 
 } from '../../services';
 import { UserProfile } from '../../models/UserProfile';
+import { auth } from '../../firebase/config';
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,11 @@ const Dashboard: React.FC = () => {
         setLoading(true);
         
         // Get current admin user
-        const user = await userService.getCurrentUserProfile();
-        setAdminUser(user);
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          const user = await userService.getUserProfile(currentUser.uid);
+          setAdminUser(user);
+        }
         
         // Fetch counts for dashboard
         const [chapters, quizzes, words, announcements] = await Promise.all([

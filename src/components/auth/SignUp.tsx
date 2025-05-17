@@ -13,6 +13,7 @@ const QuillIcon = () => (
 
 const SignUp: React.FC = () => {
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,7 +33,7 @@ const SignUp: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !username || !email || !password || !confirmPassword) {
       setError('All fields are required');
       return;
     }
@@ -45,7 +46,7 @@ const SignUp: React.FC = () => {
       setError('');
       setLoading(true);
       console.log("Submitting signup form...");
-      const user = await signup(email, password, name);
+      const user = await signup(email, password, name, username);
       console.log("Signup successful, user:", user.email);
       setSignupSuccess(true);
       
@@ -167,6 +168,23 @@ const SignUp: React.FC = () => {
                   onChange={(e) => setName(e.target.value)}
                   className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Full Name"
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label htmlFor="username" className="sr-only">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  placeholder="Username (will be displayed publicly)"
                   disabled={loading}
                 />
               </div>

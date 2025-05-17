@@ -8,7 +8,7 @@ interface AuthContextProps {
   userData: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<FirebaseUser>;
-  signup: (email: string, password: string, displayName?: string) => Promise<FirebaseUser>;
+  signup: (email: string, password: string, displayName?: string, username?: string) => Promise<FirebaseUser>;
   logout: () => Promise<void>;
 }
 
@@ -69,10 +69,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signup = async (email: string, password: string, displayName?: string) => {
-    console.log("Signup attempt for:", email);
+  const signup = async (email: string, password: string, displayName?: string, username?: string) => {
+    console.log("Signup attempt for:", email, "with username:", username);
     try {
-      const result = await registerUser(email, password, displayName);
+      const result = await registerUser(email, password, displayName, username);
       console.log("Signup successful:", result.user.email);
       return result.user;
     } catch (error) {

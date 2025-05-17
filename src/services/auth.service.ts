@@ -4,26 +4,82 @@ import {
   signOut,
   UserCredential
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
 
 // User interface
 export interface User {
   email: string;
   displayName?: string;
+  username?: string;
   uid: string;
 }
+
+// Helper function to check if two dates are consecutive days
+const isConsecutiveDay = (date1: Date, date2: Date): boolean => {
+  // Set both dates to midnight for accurate day comparison
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  d1.setHours(0, 0, 0, 0);
+  d2.setHours(0, 0, 0, 0);
+  
+  // Calculate the difference in days
+  const diffTime = Math.abs(d2.getTime() - d1.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays === 1;
+};
 
 // Login user
 export const loginUser = async (email: string, password: string): Promise<UserCredential> => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
+    
+    // Get user's current profile from Firestore directly to avoid circular dependency
+    const userRef = doc(db, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    const now = new Date();
+    
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      let updates: any = {};
+      
+      // Check if user has logged in before
+      if (userData.lastLogin) {
+        const lastLogin = new Date(userData.lastLogin);
+        const today = new Date();
+        
+        // If last login was not today
+        if (lastLogin.toDateString() !== today.toDateString()) {
+          // Check if it's a consecutive day
+          if (isConsecutiveDay(lastLogin, now)) {
+            // Increment streak
+            updates.dailyQuizStreak = (userData.dailyQuizStreak || 0) + 1;
+          } else {
+            // Reset streak if not consecutive
+            updates.dailyQuizStreak = 1;
+          }
+        }
+      } else {
+        // First time login, set initial streak
+        updates.dailyQuizStreak = 1;
+      }
+      
+      // Always update last login time
+      updates.lastLogin = now.getTime();
+      updates.updatedAt = now.getTime();
+      
+      // Update the user document
+      await updateDoc(userRef, updates);
+    }
     
     // Save login attempt to database
-    await saveLoginActivity(userCredential.user.uid, email);
+    await saveLoginActivity(userId, email);
     
     return userCredential;
   } catch (error) {
+    console.error('Login error:', error);
     throw error;
   }
 };
@@ -32,7 +88,8 @@ export const loginUser = async (email: string, password: string): Promise<UserCr
 export const registerUser = async (
   email: string, 
   password: string, 
-  displayName?: string
+  displayName?: string,
+  username?: string
 ): Promise<UserCredential> => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -41,6 +98,7 @@ export const registerUser = async (
     await saveUserData(userCredential.user.uid, {
       email,
       displayName: displayName || '',
+      username: username || displayName || email.split('@')[0],
       uid: userCredential.user.uid,
     });
     

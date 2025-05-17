@@ -3,11 +3,15 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services';
 import { UserProfile } from '../../models/UserProfile';
+import { useNavigate, Link } from 'react-router-dom';
+import { auth } from '../../firebase/config';
 
 const ProfilePageExample: React.FC = () => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'achievements' | 'progress' | 'settings'>('overview');
   const [dailyNotifications, setDailyNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
@@ -33,6 +37,15 @@ const ProfilePageExample: React.FC = () => {
   ];
 
   useEffect(() => {
+    console.log("ProfilePage: Auth state -", currentUser ? "Logged in" : "Not logged in");
+    
+    // Check authentication
+    if (!currentUser) {
+      console.log("ProfilePage: No authenticated user, redirecting to login");
+      navigate('/login', { state: { from: '/profile' } });
+      return;
+    }
+    
     const fetchUserProfile = async () => {
       if (currentUser?.uid) {
         try {
@@ -56,7 +69,10 @@ const ProfilePageExample: React.FC = () => {
               lexIQScore: 0,
               lastLogin: now,
               createdAt: now,
-              updatedAt: now
+              updatedAt: now,
+              dailyNotifications: true,
+              soundEffects: true,
+              profession: ''
             };
             
             try {
@@ -116,8 +132,9 @@ const ProfilePageExample: React.FC = () => {
     });
   };
 
-  // Calculate level progress
-  const levelProgress = userProfile ? ((userProfile.level % 1) * 100) : 0;
+  // Calculate level progress - ensure level is a number and default to 1 if not
+  const safeLevel = userProfile && typeof userProfile.level === 'number' ? userProfile.level : 1;
+  const levelProgress = (safeLevel % 1) * 100;
   
   // Get badge level based on count
   const getBadgeLevel = (count: number) => {
@@ -178,6 +195,7 @@ const ProfilePageExample: React.FC = () => {
     }
   };
 
+  // Handle various states
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -186,12 +204,48 @@ const ProfilePageExample: React.FC = () => {
       </div>
     );
   }
+  
+  if (error) {
+    return (
+      <div className="text-center text-white p-8">
+        <h2 className="text-2xl font-bold mb-4">Error Loading Profile</h2>
+        <p className="mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-[#f5e1a0] text-[#0F172A] rounded hover:bg-[#f5e1a0]/80 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="text-center text-white p-8">
+        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+        <p className="mb-4">Please log in to view your profile.</p>
+        <Link 
+          to="/login"
+          className="px-4 py-2 bg-[#f5e1a0] text-[#0F172A] rounded hover:bg-[#f5e1a0]/80 transition-colors inline-block"
+        >
+          Go to Login
+        </Link>
+      </div>
+    );
+  }
 
   if (!userProfile) {
     return (
       <div className="text-center text-white p-8">
         <h2 className="text-2xl font-bold mb-4">Profile Not Available</h2>
-        <p>We couldn't load your profile information. Please try again later.</p>
+        <p className="mb-4">We couldn't load your profile information.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-[#f5e1a0] text-[#0F172A] rounded hover:bg-[#f5e1a0]/80 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -212,7 +266,7 @@ const ProfilePageExample: React.FC = () => {
                 {userProfile.username ? userProfile.username.charAt(0).toUpperCase() : 'U'}
               </div>
               <div className="absolute -bottom-2 -right-2 bg-[#f5e1a0] text-[#0F172A] rounded-full px-2 py-1 text-xs font-bold">
-                Lvl {Math.floor(userProfile.level)}
+                Lvl {Math.floor(safeLevel)}
               </div>
             </div>
 
@@ -304,7 +358,7 @@ const ProfilePageExample: React.FC = () => {
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Current Level</div>
                   <div className="flex items-end">
-                    <span className="text-3xl font-bold text-white">{Math.floor(userProfile.level)}</span>
+                    <span className="text-3xl font-bold text-white">{Math.floor(safeLevel)}</span>
                     <span className="text-[#f5e1a0] ml-2 mb-1">
                       {levelProgress.toFixed(0)}% to next
                     </span>

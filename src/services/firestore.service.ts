@@ -92,6 +92,23 @@ export class FirestoreService {
   }
 
   /**
+   * Get a single document by ID
+   */
+  async getDoc<T = DocumentData>(collectionPath: string, docId: string): Promise<(T & { id: string }) | null> {
+    const docRef = doc(db, collectionPath, docId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      } as T & { id: string };
+    }
+    
+    return null;
+  }
+
+  /**
    * Query documents with conditions
    */
   async query<T = DocumentData>(
