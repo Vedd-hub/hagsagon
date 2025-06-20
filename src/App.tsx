@@ -19,6 +19,12 @@ import QuizListPublic from './components/quizzes/QuizListPublic';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ErrorPage from './pages/ErrorPage';
 import { AuthProvider } from './contexts/AuthContext';
+import ArticleHunt from './components/games/ArticleHunt';
+import LexIQWordGame from './components/games/LexIQWordGame';
+import TimelineChallenge from './components/games/TimelineChallenge';
+import MainLayout from './components/main/MainLayout';
+import GamesPage from './components/games/GamesPage';
+import ConstitutionChronicles from './components/games/ConstitutionChronicles';
 import './App.css';
 
 // Simple 404 Not Found component
@@ -54,16 +60,27 @@ const App: React.FC = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/main" element={<MainPage />} />
+
+            {/* Main app layout with sidebar */}
+            <Route element={<MainLayout />}>
+              <Route path="/main" element={<MainPage />} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePageExample /></ProtectedRoute>} />
+              <Route path="/community" element={<ProtectedRoute><CommunityPageExample /></ProtectedRoute>} />
+              <Route path="/games" element={<GamesPage />} />
+              <Route path="/games/article-hunt" element={<ArticleHunt />} />
+              <Route path="/games/lexiq-word" element={<LexIQWordGame />} />
+              <Route path="/games/timeline-challenge" element={<TimelineChallenge />} />
+              <Route path="/games/constitution-chronicles" element={<ConstitutionChronicles />} />
+            </Route>
+
+            {/* Other routes */}
             <Route path="/firestore-example" element={<FirestoreExample />} />
             <Route path="/user-engagement" element={<UserEngagementExample />} />
             <Route path="/quizzes" element={<QuizListPublic />} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePageExample /></ProtectedRoute>} />
-            <Route path="/community" element={<ProtectedRoute><CommunityPageExample /></ProtectedRoute>} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="/error" element={<ErrorPage />} />
-            
+
             {/* Admin routes - protected by AdminRoute */}
             <Route path="/admin" element={<AdminRoute />}>
               <Route index element={<AdminDashboard />} />

@@ -26,3 +26,9 @@ code {
     @apply font-serif text-4xl md:text-5xl lg:text-6xl text-primary font-bold;
   }
 }
+
+@layer utilities {
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+}

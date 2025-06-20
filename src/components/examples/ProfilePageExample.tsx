@@ -16,6 +16,10 @@ const ProfilePageExample: React.FC = () => {
   const [dailyNotifications, setDailyNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [profession, setProfession] = useState<string>('');
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState(userProfile?.username || '');
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [savingUsername, setSavingUsername] = useState(false);
 
   // Profession options
   const professionOptions = [
@@ -192,6 +196,39 @@ const ProfilePageExample: React.FC = () => {
     setProfession(newProfession);
     if (userProfile) {
       await userService.updateUserProfile(userProfile.uid, { profession: newProfession });
+    }
+  };
+
+  // Handle edit username
+  const handleEditUsername = () => {
+    setNewUsername(userProfile?.username || '');
+    setEditingUsername(true);
+    setUsernameError(null);
+  };
+  const handleCancelEditUsername = () => {
+    setEditingUsername(false);
+    setUsernameError(null);
+  };
+  const handleSaveUsername = async () => {
+    if (!newUsername.trim()) {
+      setUsernameError('Username cannot be empty');
+      return;
+    }
+    if (newUsername.length < 3) {
+      setUsernameError('Username must be at least 3 characters long');
+      return;
+    }
+    if (!userProfile) return; // Guard clause to prevent null access
+    setSavingUsername(true);
+    try {
+      await userService.updateUserProfile(userProfile.uid, { username: newUsername });
+      setEditingUsername(false);
+      setUsernameError(null);
+      setUserProfile({ ...userProfile, username: newUsername });
+    } catch (err) {
+      setUsernameError('Failed to update username');
+    } finally {
+      setSavingUsername(false);
     }
   };
 
@@ -563,12 +600,47 @@ const ProfilePageExample: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-gray-400 text-sm mb-1">Username</label>
-                    <input
-                      type="text"
-                      value={userProfile.username}
-                      readOnly
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none"
-                    />
+                    {editingUsername ? (
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={newUsername}
+                          onChange={e => setNewUsername(e.target.value)}
+                          className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none"
+                          disabled={savingUsername}
+                        />
+                        <button
+                          onClick={handleSaveUsername}
+                          className="px-3 py-2 bg-[#f5e1a0] text-[#232b39] rounded font-bold hover:bg-[#ffe08a] transition-colors text-sm"
+                          disabled={savingUsername}
+                        >
+                          {savingUsername ? 'Saving...' : 'Save'}
+                        </button>
+                        <button
+                          onClick={handleCancelEditUsername}
+                          className="px-3 py-2 bg-gray-700 text-white rounded font-bold hover:bg-gray-600 transition-colors text-sm"
+                          disabled={savingUsername}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          value={userProfile.username}
+                          readOnly
+                          className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none"
+                        />
+                        <button
+                          onClick={handleEditUsername}
+                          className="px-3 py-2 bg-[#f5e1a0]/20 text-[#f5e1a0] rounded hover:bg-[#f5e1a0]/30 transition-colors text-sm font-medium"
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                    {usernameError && <div className="text-red-400 text-xs mt-1">{usernameError}</div>}
                   </div>
                   <div>
                     <label className="block text-gray-400 text-sm mb-1">Email</label>
