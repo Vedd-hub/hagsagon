@@ -17,6 +17,88 @@ code {
     monospace;
 }
 
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  /* Prevent horizontal scrolling on mobile */
+  .mobile-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Improve touch targets */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better mobile spacing */
+  .mobile-spacing {
+    padding: 1rem;
+  }
+  
+  /* Mobile-friendly text sizes */
+  .mobile-text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .mobile-text-base {
+    font-size: 1rem;
+  }
+  
+  .mobile-text-lg {
+    font-size: 1.125rem;
+  }
+}
+
+/* Tablet-specific styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-container {
+    max-width: 90vw;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 225, 160, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 225, 160, 0.7);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus {
+  outline: 2px solid #f5e1a0;
+  outline-offset: 2px;
+}
+
+/* Mobile focus styles */
+@media (max-width: 768px) {
+  *:focus {
+    outline: 3px solid #f5e1a0;
+    outline-offset: 1px;
+  }
+}
+
 @layer components {
   .btn-primary {
     @apply bg-primary text-white py-2 px-4 rounded-md transition-all duration-300 hover:bg-opacity-90;
@@ -25,10 +107,94 @@ code {
   .constitutional-heading {
     @apply font-serif text-4xl md:text-5xl lg:text-6xl text-primary font-bold;
   }
+  
+  /* Responsive button component */
+  .btn-responsive {
+    @apply py-2 px-4 md:py-3 md:px-6 text-sm md:text-base font-medium rounded-md transition-all duration-300;
+  }
+  
+  /* Responsive card component */
+  .card-responsive {
+    @apply p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg;
+  }
+  
+  /* Responsive text component */
+  .text-responsive {
+    @apply text-sm md:text-base lg:text-lg;
+  }
+  
+  /* Mobile navigation styles */
+  .mobile-nav {
+    @apply fixed top-0 left-0 w-64 h-full bg-[#1a2233] z-[1000] transform transition-transform duration-300 ease-in-out;
+  }
+  
+  .mobile-nav-open {
+    @apply translate-x-0;
+  }
+  
+  .mobile-nav-closed {
+    @apply -translate-x-full;
+  }
 }
 
 @layer utilities {
   .font-playfair {
     font-family: 'Playfair Display', serif;
+  }
+  
+  /* Responsive spacing utilities */
+  .responsive-p {
+    @apply p-4 md:p-6 lg:p-8;
+  }
+  
+  .responsive-px {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+  
+  .responsive-py {
+    @apply py-4 md:py-6 lg:py-8;
+  }
+  
+  .responsive-m {
+    @apply m-4 md:m-6 lg:m-8;
+  }
+  
+  .responsive-mx {
+    @apply mx-4 md:mx-6 lg:mx-8;
+  }
+  
+  .responsive-my {
+    @apply my-4 md:my-6 lg:my-8;
+  }
+  
+  /* Responsive grid utilities */
+  .grid-responsive {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+  
+  /* Responsive flex utilities */
+  .flex-responsive {
+    @apply flex flex-col md:flex-row;
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-sm {
+    @apply text-xs md:text-sm lg:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-sm md:text-base lg:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base md:text-lg lg:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-xl md:text-2xl lg:text-3xl;
   }
 }

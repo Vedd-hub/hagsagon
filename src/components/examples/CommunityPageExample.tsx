@@ -119,7 +119,6 @@ const CommunityPageExample: React.FC = () => {
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'leaderboard'>('chat');
   const [newMessage, setNewMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [users] = useState(mockUsers);
@@ -368,221 +367,99 @@ const CommunityPageExample: React.FC = () => {
     );
   }
 
-  // Simplified UI rendering with fewer animations for better performance
   return (
-    <div className="container mx-auto p-4">
-      {/* Tab navigation */}
-      <div className="mb-6 flex border-b border-[#f5e1a0]/20">
-        <button
-          onClick={() => setActiveTab('chat')}
-          className={`py-3 px-5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'chat'
-              ? 'border-[#f5e1a0] text-[#f5e1a0]'
-              : 'border-transparent text-gray-400 hover:text-white'
-          }`}
-        >
-          Community Chat
-        </button>
-        <button
-          onClick={() => setActiveTab('leaderboard')}
-          className={`py-3 px-5 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'leaderboard'
-              ? 'border-[#f5e1a0] text-[#f5e1a0]'
-              : 'border-transparent text-gray-400 hover:text-white'
-          }`}
-        >
-          Leaderboard
-        </button>
-      </div>
-      
-      {/* Chat Tab - Optimized */}
-      {activeTab === 'chat' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Message Feed */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/10 backdrop-blur-md p-6 rounded-lg border border-[#f5e1a0]/20">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-serif font-bold text-white">Community Chat</h2>
-                <div className="text-sm text-gray-400">Share your achievements</div>
-              </div>
-              
-              {/* Post new message */}
-              <form onSubmit={handleSendMessage} className="mb-6">
-                <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-10 h-10 bg-[#f5e1a0]/50 rounded-full flex items-center justify-center text-lg">
-                    {(userProfile?.username || 'U').charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1">
-                    <textarea
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Share an achievement or start a discussion..."
-                      className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none min-h-[80px]"
-                      disabled={posting}
-                    />
-                    {error && (
-                      <div className="text-red-500 text-sm mt-2">
-                        {error}
-                      </div>
-                    )}
-                    <div className="flex justify-between mt-2">
-                      <div className="text-sm text-gray-400">
-                        Share achievements!
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={!newMessage.trim() || posting}
-                        className={`px-4 py-2 bg-[#f5e1a0]/20 text-[#f5e1a0] rounded hover:bg-[#f5e1a0]/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                          posting ? 'animate-pulse' : ''
-                        }`}
-                      >
-                        {posting ? 'Posting...' : `Post as ${userProfile?.username || currentUser?.displayName || 'User'}`}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-              
-              {/* Message list - simplified */}
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#181e26] via-[#232b39] to-[#1a2233] py-8 px-2 md:px-4">
+      <div className="w-full max-w-6xl h-[90vh] flex gap-4 md:gap-6">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col bg-black/40 backdrop-blur-md border border-[#f5e1a0]/20 rounded-2xl shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-[#f5e1a0]/20">
+            <h1 className="text-2xl font-bold font-playfair text-[#f5e1a0]">Community Hub</h1>
+          </div>
+          
+          <div className="flex-1 flex flex-col p-4 overflow-y-auto">
+              {/* Chat Feed */}
               <div className="space-y-4">
                 {messagesLoading ? (
-                  <div className="text-center py-4">
-                    <div className="inline-block w-6 h-6 border-2 border-[#f5e1a0]/30 border-t-[#f5e1a0] rounded-full animate-spin mb-2"></div>
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center py-4 text-gray-400">
-                    <p>No messages yet. Be the first!</p>
-                  </div>
+                  <div className="text-center py-10 text-[#f5e1a0]">Loading messages...</div>
                 ) : (
-                  messages.map((message) => (
-                    <div key={message.id} className="bg-black/30 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <div 
-                          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                          style={{ backgroundColor: message.avatarColor + '80' }}
-                        >
-                          {message.username ? message.username.charAt(0).toUpperCase() : 'U'}
+                  messages.map(message => (
+                    <div key={message.id} className="flex items-start gap-3 bg-white/5 p-3 rounded-lg">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg" style={{ backgroundColor: message.avatarColor }}>
+                        {message.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-bold text-[#f5e1a0]">{message.username}</span>
+                          <span className="text-xs text-white/50">{formatMessageTime(message.timestamp)}</span>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center">
-                            <div className="font-medium text-white">{message.username}</div>
-                            <div className="text-xs text-gray-400">{formatMessageTime(message.timestamp)}</div>
-                          </div>
-                          <div className="text-gray-300 mt-1 mb-3">{message.text}</div>
-                          <div className="flex justify-between">
-                            <button 
-                              onClick={() => handleLikeMessage(message.id)}
-                              className={`text-sm ${
-                                message.likedBy?.includes(currentUser?.uid || '') 
-                                  ? 'text-[#f5e1a0]' 
-                                  : 'text-gray-400 hover:text-[#f5e1a0]'
-                              } transition-colors flex items-center`}
-                            >
-                              <span className="mr-1">❤️</span> {message.likes} likes
-                            </button>
-                          </div>
+                        <p className="text-white/90 mt-1">{message.text}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <button onClick={() => handleLikeMessage(message.id)} className="flex items-center gap-1 text-sm text-white/60 hover:text-[#f5e1a0] transition-colors">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.5l1.318-1.182a4.5 4.5 0 116.364 6.364L12 18.75l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                            <span>{message.likes}</span>
+                          </button>
                         </div>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-            </div>
           </div>
-          
-          {/* Sidebar - lazy loaded */}
-          <div>
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-lg border border-[#f5e1a0]/20 mb-4">
-              <h3 className="text-lg font-serif font-bold text-white mb-3">Your Badges</h3>
-              <div className="flex flex-wrap mb-3">
-                {userProfile.badges && userProfile.badges.length > 0 ? (
-                  userProfile.badges.slice(0, 5).map((badge, index) => (
-                    <BadgeDisplay key={index} badgeName={badge} size="sm" />
-                  ))
-                ) : (
-                  <p className="text-gray-400 text-sm">Complete challenges to earn badges!</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Community members - only show a few for performance */}
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-lg border border-[#f5e1a0]/20">
-              <h3 className="text-lg font-serif font-bold text-white mb-3">Community</h3>
-              <div className="space-y-2">
-                {users.slice(0, 3).map((user) => (
-                  <div key={user.id} className="flex items-center gap-2 p-2 hover:bg-black/20 rounded-lg">
-                    <div 
-                      className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm"
-                      style={{ backgroundColor: user.avatarColor + '80' }}
-                    >
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="truncate">
-                      <div className="text-white text-sm font-medium truncate">{user.username}</div>
-                      <div className="text-[#f5e1a0] text-xs">Level {user.level}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+
+          {/* Message Input */}
+          <div className="p-4 border-t border-[#f5e1a0]/20">
+            <form onSubmit={handleSendMessage} className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder={currentUser ? "Share your progress..." : "Login to chat"}
+                disabled={!currentUser || posting}
+                className="flex-1 bg-white/10 border border-[#f5e1a0]/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#f5e1a0]"
+              />
+              <button
+                type="submit"
+                disabled={!currentUser || posting || !newMessage.trim()}
+                className="bg-[#f5e1a0] text-[#1a2233] font-bold px-6 py-2 rounded-lg hover:bg-[#e2d8c0] transition-colors disabled:opacity-50"
+              >
+                {posting ? '...' : 'Post'}
+              </button>
+            </form>
           </div>
         </div>
-      )}
-      
-      {/* Leaderboard Tab - Simplified */}
-      {activeTab === 'leaderboard' && (
-        <div className="bg-white/10 backdrop-blur-md p-6 rounded-lg border border-[#f5e1a0]/20">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-serif font-bold text-white">Leaderboard</h2>
-            <div className="text-sm text-gray-400">Top community members</div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left border-b border-gray-700">
-                  <th className="py-3 px-4 text-gray-400">Rank</th>
-                  <th className="py-3 px-4 text-gray-400">User</th>
-                  <th className="py-3 px-4 text-gray-400">Level</th>
-                  <th className="py-3 px-4 text-gray-400">Badges</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...users].sort((a, b) => b.level - a.level).map((user, index) => (
-                  <tr key={user.id} className="border-b border-gray-800 hover:bg-black/20">
-                    <td className="py-3 px-4 text-gray-300">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-800">
-                        {index + 1}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center">
-                        <div 
-                          className="w-8 h-8 rounded-full mr-3 flex items-center justify-center"
-                          style={{ backgroundColor: user.avatarColor + '80' }}
-                        >
-                          {user.username.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="text-white font-medium">{user.username}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="text-[#f5e1a0] font-bold">Level {user.level}</div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-wrap">
-                        {user.badges.slice(0, 3).map((badge, badgeIndex) => (
-                          <BadgeDisplay key={badgeIndex} badgeName={badge} size="sm" />
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+        {/* Right Sidebar */}
+        <div className="w-1/3 hidden lg:flex flex-col gap-4">
+          {/* Current User Card */}
+          <div className="bg-black/40 backdrop-blur-md border border-[#f5e1a0]/20 rounded-2xl shadow-lg p-4 flex flex-col items-center text-center">
+            {loading ? (
+              <div className="py-10 text-white/80">Loading profile...</div>
+            ) : userProfile ? (
+              <>
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#667eea] to-[#764ba2] flex items-center justify-center font-bold text-white text-4xl mb-3 border-2 border-white/20">
+                  {userProfile.username.charAt(0).toUpperCase()}
+                </div>
+                <h2 className="text-xl font-bold text-[#f5e1a0]">{userProfile.username}</h2>
+                <p className="text-sm text-white/60 mb-2">{userProfile.profession || 'Constitutional Enthusiast'}</p>
+                <div className="text-lg text-white font-semibold">Level {userProfile.level}</div>
+                <div className="w-full bg-white/10 h-1.5 rounded-full mt-1 mb-3">
+                  <div className="bg-[#f5e1a0] h-1.5 rounded-full" style={{ width: `${(userProfile.level % 10) * 10}%` }}></div>
+                </div>
+                <div className="flex flex-wrap justify-center">
+                  {userProfile.badges.length > 0 ? (
+                    userProfile.badges.map(badge => <BadgeDisplay key={badge} badgeName={badge} size="sm" />)
+                  ) : (
+                    <p className="text-xs text-white/50">No badges yet. Play games to earn them!</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="py-10 text-red-500">Could not load profile.</div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

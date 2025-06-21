@@ -243,6 +243,146 @@ export class UserService {
   }
 
   /**
+   * Complete a quiz and update streak
+   * This is the main method for quiz-based streak logic
+   */
+  async completeQuiz(uid: string, quizScore: number, quizType: string = 'general'): Promise<{
+    streakUpdated: boolean;
+    newStreak: number;
+    streakBonus: number;
+    message: string;
+  }> {
+    const user = await this.getUserProfile(uid);
+    if (!user) throw new Error('User not found');
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Check if user has already completed a quiz today
+    const lastQuizDate = user.lastQuizDate ? new Date(user.lastQuizDate) : null;
+    const lastQuizToday = lastQuizDate ? 
+      new Date(lastQuizDate.getFullYear(), lastQuizDate.getMonth(), lastQuizDate.getDate()).getTime() === today.getTime() : 
+      false;
+
+    if (lastQuizToday) {
+      // Already completed a quiz today, don't update streak
+      return {
+        streakUpdated: false,
+        newStreak: user.dailyQuizStreak,
+        streakBonus: 0,
+        message: 'Quiz already completed today!'
+      };
+    }
+
+    let newStreak = user.dailyQuizStreak;
+    let streakBonus = 0;
+    let message = '';
+    let daysDiff = 0;
+
+    // Check if this is a consecutive day
+    if (lastQuizDate) {
+      const lastQuizDay = new Date(lastQuizDate.getFullYear(), lastQuizDate.getMonth(), lastQuizDate.getDate());
+      daysDiff = Math.floor((today.getTime() - lastQuizDay.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysDiff === 1) {
+        // Consecutive day - increment streak
+        newStreak = user.dailyQuizStreak + 1;
+        streakBonus = Math.min(newStreak * 5, 50); // Bonus points based on streak (max 50)
+        message = `🔥 Streak continued! Day ${newStreak}`;
+      } else if (daysDiff === 2 && user.streakFreezeUsed === false) {
+        // Missed one day but has streak freeze - maintain streak
+        newStreak = user.dailyQuizStreak;
+        streakBonus = Math.min(newStreak * 3, 30); // Reduced bonus for using freeze
+        message = `❄️ Streak protected! Day ${newStreak} (freeze used)`;
+      } else if (daysDiff > 1) {
+        // Missed multiple days - reset streak
+        newStreak = 1;
+        streakBonus = 5; // Small bonus for starting new streak
+        message = '🔄 New streak started!';
+      }
+    } else {
+      // First quiz ever
+      newStreak = 1;
+      streakBonus = 5;
+      message = '🎯 First quiz completed!';
+    }
+
+    // Calculate total score with streak bonus
+    const totalScore = quizScore + streakBonus;
+
+    // Update user profile
+    await this.updateUserProfile(uid, {
+      dailyQuizStreak: newStreak,
+      lastQuizDate: today.getTime(),
+      streakFreezeUsed: daysDiff === 2 ? true : user.streakFreezeUsed,
+      lexIQScore: user.lexIQScore + totalScore,
+      gamesPlayed: user.gamesPlayed + 1
+    });
+
+    return {
+      streakUpdated: true,
+      newStreak,
+      streakBonus,
+      message
+    };
+  }
+
+  /**
+   * Use streak freeze to protect streak for one missed day
+   */
+  async useStreakFreeze(uid: string): Promise<boolean> {
+    const user = await this.getUserProfile(uid);
+    if (!user) throw new Error('User not found');
+
+    if (user.streakFreezeUsed) {
+      return false; // Already used
+    }
+
+    await this.updateUserProfile(uid, {
+      streakFreezeUsed: true
+    });
+
+    return true;
+  }
+
+  /**
+   * Reset streak freeze (can be called daily or weekly)
+   */
+  async resetStreakFreeze(uid: string): Promise<void> {
+    return this.updateUserProfile(uid, {
+      streakFreezeUsed: false
+    });
+  }
+
+  /**
+   * Get streak statistics
+   */
+  async getStreakStats(uid: string): Promise<{
+    currentStreak: number;
+    longestStreak: number;
+    totalQuizzes: number;
+    streakFreezeAvailable: boolean;
+    nextMilestone: number;
+    daysToNextMilestone: number;
+  }> {
+    const user = await this.getUserProfile(uid);
+    if (!user) throw new Error('User not found');
+
+    const milestones = [7, 14, 30, 60, 100];
+    const nextMilestone = milestones.find(m => m > user.dailyQuizStreak) || 100;
+    const daysToNextMilestone = nextMilestone - user.dailyQuizStreak;
+
+    return {
+      currentStreak: user.dailyQuizStreak,
+      longestStreak: user.longestStreak || user.dailyQuizStreak,
+      totalQuizzes: user.gamesPlayed,
+      streakFreezeAvailable: !user.streakFreezeUsed,
+      nextMilestone,
+      daysToNextMilestone
+    };
+  }
+
+  /**
    * Add completed chapter
    */
   async addCompletedChapter(uid: string, chapterId: string): Promise<void> {

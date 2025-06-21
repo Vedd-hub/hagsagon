@@ -63,7 +63,7 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5e1a0] via-[#e2d8c0] to-[#bfa77a] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5e1a0] via-[#e2d8c0] to-[#bfa77a] py-6 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Constitution book watermark prints */}
       <div className="absolute inset-0 z-0 pointer-events-none select-none">
         {[
@@ -101,7 +101,7 @@ const SignUp: React.FC = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="max-w-md w-full space-y-8 bg-white/40 backdrop-blur-lg p-10 rounded-3xl shadow-2xl border border-yellow-200 relative overflow-hidden"
+        className="max-w-md w-full space-y-6 md:space-y-8 bg-white/40 backdrop-blur-lg p-6 md:p-10 rounded-2xl md:rounded-3xl shadow-2xl border border-yellow-200 relative overflow-hidden"
         style={{ boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)' }}
       >
         <motion.div
@@ -111,13 +111,13 @@ const SignUp: React.FC = () => {
           className="text-center"
         >
           <QuillIcon />
-          <h2 className="text-3xl font-bold text-amber-800 font-serif">LexIQ</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-amber-800 font-serif">LexIQ</h2>
         </motion.div>
         <div>
-          <h2 className="mt-2 text-center text-2xl font-extrabold text-primary font-serif drop-shadow-md">
+          <h2 className="mt-2 text-center text-xl md:text-2xl font-extrabold text-primary font-serif drop-shadow-md">
             Create a new account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-700">
+          <p className="mt-2 text-center text-xs md:text-sm text-gray-700">
             Or{' '}
             <Link to="/login" className="font-medium text-accent hover:text-accent/80 underline">
               sign in to your existing account
@@ -129,31 +129,31 @@ const SignUp: React.FC = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-green-100 border border-green-400 text-green-700 px-4 py-6 rounded shadow-sm text-center"
+            className="bg-green-100 border border-green-400 text-green-700 px-3 md:px-4 py-4 md:py-6 rounded shadow-sm text-center"
           >
             <motion.div 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="text-4xl mb-3"
+              className="text-3xl md:text-4xl mb-3"
             >
               ✅
             </motion.div>
-            <h3 className="font-bold text-lg mb-2">Account Created Successfully!</h3>
-            <p>You will be redirected to the main page shortly...</p>
+            <h3 className="font-bold text-base md:text-lg mb-2">Account Created Successfully!</h3>
+            <p className="text-sm md:text-base">You will be redirected to the main page shortly...</p>
           </motion.div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="mt-6 md:mt-8 space-y-4 md:space-y-6" onSubmit={handleSubmit}>
             {error && (
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-sm"
+                className="bg-red-100 border border-red-400 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded shadow-sm text-sm"
               >
                 {error}
               </motion.div>
             )}
-            <div className="space-y-4 rounded-md">
+            <div className="space-y-3 md:space-y-4 rounded-md">
               <div>
                 <label htmlFor="name" className="sr-only">
                   Full Name
@@ -166,7 +166,7 @@ const SignUp: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Full Name"
                   disabled={loading}
                 />
@@ -183,7 +183,7 @@ const SignUp: React.FC = () => {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Username (will be displayed publicly)"
                   disabled={loading}
                 />
@@ -200,7 +200,7 @@ const SignUp: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Email address"
                   disabled={loading}
                 />
@@ -217,7 +217,7 @@ const SignUp: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Password"
                   disabled={loading}
                 />
@@ -234,7 +234,7 @@ const SignUp: React.FC = () => {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 sm:text-sm bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
+                  className="transition-all duration-300 appearance-none rounded-md relative block w-full px-3 py-2 md:py-3 border border-yellow-300 placeholder-yellow-700 text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent focus:z-10 text-sm md:text-base bg-white/70 backdrop-blur-md shadow-inner hover:shadow-lg"
                   placeholder="Confirm Password"
                   disabled={loading}
                 />
@@ -245,28 +245,24 @@ const SignUp: React.FC = () => {
                 whileHover={{ scale: 1.04, boxShadow: '0 0 8px #C19A6B' }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
+                className="group relative w-full flex justify-center py-2 md:py-3 px-4 border border-transparent text-sm md:text-base font-bold rounded-md text-white bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-500 hover:from-yellow-600 hover:to-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent shadow-lg transition-all duration-300"
                 disabled={loading}
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account...
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
               </motion.button>
             </div>
           </form>
         )}
-        
-        <div className="mt-4 text-center">
-          <Link to="/" className="font-medium text-accent hover:text-accent/80 text-sm underline">
-            Back to Home
-          </Link>
-        </div>
-        {/* Animated border accent */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
-          transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse' }}
-          className="absolute -inset-1 rounded-3xl border-4 border-yellow-300 pointer-events-none z-0"
-          style={{ filter: 'blur(2px)' }}
-        />
       </motion.div>
     </div>
   );

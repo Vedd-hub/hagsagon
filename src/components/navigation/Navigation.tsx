@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+interface NavigationProps {
+  onMobileClose?: () => void;
+}
+
 const navItems = [
   { path: '/main', label: 'Dashboard', icon: (
     <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg>
@@ -14,6 +18,9 @@ const navItems = [
   { path: '/games', label: 'Games', icon: (
     <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
   ) },
+  { path: '/leaderboard/constitution-chronicles', label: 'Leaderboard', icon: (
+    <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c1.657 0 3 1.343 3 3s-1.343 3-3 3-3-1.343-3-3 1.343-3 3-3zm0 0V5m0 6v.01M12 18.5a7.5 7.5 0 01-7.5-7.5H2a10 10 0 1010-10v2.5a7.5 7.5 0 010 15v2.5a10 10 0 0010-10h-2.5a7.5 7.5 0 01-7.5 7.5z" /></svg>
+  ) },
   { path: '/profile', label: 'Profile', icon: (
     <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
   ) },
@@ -25,24 +32,46 @@ const navItems = [
   ), badge: 3 },
 ];
 
-const Navigation: React.FC = () => {
+const Navigation: React.FC<NavigationProps> = ({ onMobileClose }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
+  const handleNavClick = () => {
+    if (onMobileClose) {
+      onMobileClose();
+    }
+  };
+
   return (
-    <aside className="hidden md:flex fixed top-0 left-0 z-[999] flex-col h-screen w-64 text-white font-sans shadow-xl relative" style={{
-      background: '#1a2233',
-    }}>
-      <div className="flex items-center h-16 px-8 mt-2 font-playfair text-2xl font-extrabold tracking-tight" style={{ color: '#f5e1a0' }}>
+    <aside className="fixed top-0 left-0 z-[1000] flex flex-col h-screen w-64 text-white font-sans shadow-xl overflow-y-auto bg-[#1a2233]">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between h-16 px-6 border-b border-white/10">
+        <div className="font-playfair text-xl font-extrabold tracking-tight" style={{ color: '#f5e1a0' }}>
+          LexIQ
+        </div>
+        <button
+          onClick={onMobileClose}
+          className="text-white/70 hover:text-white"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden md:flex items-center h-16 px-8 mt-2 font-playfair text-2xl font-extrabold tracking-tight" style={{ color: '#f5e1a0' }}>
         LexIQ
       </div>
-      <nav className="flex-1 flex flex-col gap-1 px-4 mt-4">
+
+      <nav className="flex flex-col gap-1 px-4 mt-4">
         {navItems.map((item) => {
           const isActive = currentPath.startsWith(item.path);
           return (
             <Link
               key={item.path}
               to={item.path}
+              onClick={handleNavClick}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-lg font-medium ${
                 isActive ? 'bg-white/10 text-[#f5e1a0]' : 'hover:bg-white/5 text-white'
               }`}
@@ -56,8 +85,17 @@ const Navigation: React.FC = () => {
           );
         })}
       </nav>
-      <div className="mt-auto mb-8 px-4">
-        <Link to="/logout" className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-500/10 font-semibold text-lg">
+      
+      <div className="flex-1"></div>
+      <div className="px-4 mb-4">
+        <div className="h-0.5 bg-white/60"></div>
+      </div>
+      <div className="mb-8 px-4">
+        <Link 
+          to="/logout" 
+          onClick={handleNavClick}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-500/10 font-semibold text-lg"
+        >
           <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
           Logout
         </Link>

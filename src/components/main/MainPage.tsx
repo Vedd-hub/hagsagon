@@ -145,66 +145,66 @@ const MainPage: React.FC = () => {
     <div className="min-h-screen font-sans" style={{
       background: '#232b39',
     }}>
-      {/* Welcome Bar - fixed at top of dashboard area */}
-      <div className="fixed left-64 top-0 right-0 z-10 h-16 flex items-center px-8" style={{background: '#1a2233', borderBottom: '1px solid rgba(255,255,255,0.08)'}}>
-        <h1 className="font-playfair text-xl md:text-2xl font-bold text-left leading-tight m-0">
+      {/* Welcome Bar - responsive positioning */}
+      <div className="fixed md:left-64 top-0 right-0 z-10 h-16 flex items-center px-4 md:px-8" style={{background: '#1a2233', borderBottom: '1px solid rgba(255,255,255,0.08)'}}>
+        <h1 className="font-playfair text-lg md:text-xl lg:text-2xl font-bold text-left leading-tight m-0">
           <span className="text-white">Welcome </span>
           <span className="text-[#f5e1a0]">{userName}</span>
         </h1>
       </div>
-      <main className="flex-1 pt-0 px-4 md:px-10 pb-4 md:pb-10 bg-transparent max-w-6xl mx-auto w-full mt-16">
+      <main className="flex-1 pt-0 px-4 md:px-6 lg:px-10 pb-4 md:pb-10 bg-transparent max-w-6xl mx-auto w-full mt-16">
         {/* Top Divider Line */}
-        <div className="w-full h-px bg-white/10 mb-6" />
+        <div className="w-full h-px bg-white/10 mb-4 md:mb-6" />
         {/* Progress Bar (full width) */}
-        <div className="bg-white/5 rounded-2xl p-6 shadow flex flex-row items-center gap-4 mb-8 border border-white/10 w-full">
-          <div className="flex-1">
-            <div className="text-lg font-serif font-extrabold text-white mb-2">Your Progress</div>
-            <div className="text-base text-white/70 mb-2">Completed chapters: {completedChapters}/{totalChapters}</div>
+        <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow flex flex-col md:flex-row items-start md:items-center gap-4 mb-6 md:mb-8 border border-white/10 w-full">
+          <div className="flex-1 w-full">
+            <div className="text-base md:text-lg font-serif font-extrabold text-white mb-2">Your Progress</div>
+            <div className="text-sm md:text-base text-white/70 mb-2">Completed chapters: {completedChapters}/{totalChapters}</div>
             <div className="w-full bg-white/10 rounded-full h-2">
               <div className="bg-[#f5e1a0] h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
             </div>
           </div>
-          <div className="flex flex-col items-end min-w-[70px]">
-            <span className="text-2xl font-serif font-extrabold text-[#f5e1a0] leading-none">{Math.round(progressPercentage)}%</span>
+          <div className="flex flex-col items-end min-w-[60px] md:min-w-[70px]">
+            <span className="text-xl md:text-2xl font-serif font-extrabold text-[#f5e1a0] leading-none">{Math.round(progressPercentage)}%</span>
           </div>
         </div>
         {/* Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-10">
           {/* Recent Activity */}
-          <div className="bg-white/5 rounded-2xl p-6 shadow border border-white/10 flex flex-col justify-between min-h-[220px]">
-            <h2 className="text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Recent Activity</h2>
-            <ul className="space-y-2 text-base font-normal">
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-3 h-3 bg-green-400 rounded-full mr-2"></span>Completed Preamble module</span><span className="text-xs text-white/50">2 days ago</span></li>
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-3 h-3 bg-blue-400 rounded-full mr-2"></span>Quiz on Fundamental Rights</span><span className="text-xs text-white/50">5 days ago</span></li>
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-3 h-3 bg-purple-400 rounded-full mr-2"></span>Started Article III</span><span className="text-xs text-white/50">1 week ago</span></li>
+          <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
+            <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Recent Activity</h2>
+            <ul className="space-y-2 text-sm md:text-base font-normal">
+              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-green-400 rounded-full mr-2"></span>Completed Preamble module</span><span className="text-xs text-white/50">2 days ago</span></li>
+              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-blue-400 rounded-full mr-2"></span>Quiz on Fundamental Rights</span><span className="text-xs text-white/50">5 days ago</span></li>
+              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-purple-400 rounded-full mr-2"></span>Started Article III</span><span className="text-xs text-white/50">1 week ago</span></li>
             </ul>
           </div>
           {/* Achievements */}
-          <div className="bg-white/5 rounded-2xl p-6 shadow border border-white/10 flex flex-col justify-between min-h-[220px]">
-            <h2 className="text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Achievements</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-white/80 text-lg font-serif font-semibold opacity-70"><span className="text-2xl">🎉</span> First Login</div>
-              <div className="flex items-center gap-2 text-white/80 text-lg font-serif font-semibold opacity-70"><span className="text-2xl">📄</span> Complete Preamble</div>
-              <div className="flex items-center gap-2 text-white/80 text-lg font-serif font-semibold opacity-70"><span className="text-2xl">🏆</span> Perfect Quiz</div>
-              <div className="flex items-center gap-2 text-white/80 text-lg font-serif font-semibold opacity-70"><span className="text-2xl">⚖️</span> Fundamental Rights Master</div>
+          <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
+            <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Achievements</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🎉</span> First Login</div>
+              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">📄</span> Complete Preamble</div>
+              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🏆</span> Perfect Quiz</div>
+              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">⚖️</span> Fundamental Rights Master</div>
             </div>
           </div>
         </div>
         {/* Continue Learning */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Continue Learning</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white/10 rounded-2xl overflow-hidden shadow flex flex-col">
-              <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" alt="Union and its Territory" className="h-32 w-full object-cover" />
-              <div className="p-4 text-white font-serif font-semibold text-lg">Part I: The Union and its Territory</div>
+        <div className="mt-8 md:mt-10">
+          <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Continue Learning</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
+              <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" alt="Union and its Territory" className="h-24 md:h-32 w-full object-cover" />
+              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part I: The Union and its Territory</div>
             </div>
-            <div className="bg-white/10 rounded-2xl overflow-hidden shadow flex flex-col">
-              <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Citizenship" className="h-32 w-full object-cover" />
-              <div className="p-4 text-white font-serif font-semibold text-lg">Part II: Citizenship</div>
+            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
+              <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Citizenship" className="h-24 md:h-32 w-full object-cover" />
+              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part II: Citizenship</div>
             </div>
-            <div className="bg-white/10 rounded-2xl overflow-hidden shadow flex flex-col">
-              <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Fundamental Rights" className="h-32 w-full object-cover" />
-              <div className="p-4 text-white font-serif font-semibold text-lg">Part III: Fundamental Rights</div>
+            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col sm:col-span-2 lg:col-span-1">
+              <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Fundamental Rights" className="h-24 md:h-32 w-full object-cover" />
+              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part III: Fundamental Rights</div>
             </div>
           </div>
         </div>

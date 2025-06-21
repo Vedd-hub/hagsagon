@@ -7,8 +7,14 @@ export interface UserProfile {
   badges: string[];
   lexIQScore: number;
   dailyQuizStreak: number;
+  lastQuizDate?: number; // Timestamp of last quiz completion
+  streakFreezeUsed?: boolean; // Whether streak freeze has been used
+  longestStreak?: number; // Longest streak achieved
   chaptersCompleted: string[];
   gamesPlayed: number;
+  games?: {
+    [gameId: string]: any;
+  };
   lastLogin: number;
   createdAt: number;
   updatedAt: number;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services';
+import StreakNotification from '../streak/StreakNotification';
 
 interface Word {
   term: string;
@@ -46,6 +47,10 @@ const LexIQWordGame: React.FC = () => {
   const [showHint, setShowHint] = useState(false);
   const [streak, setStreak] = useState(0);
   const { currentUser } = useAuth();
+  const [showStreakNotification, setShowStreakNotification] = useState(false);
+  const [streakMessage, setStreakMessage] = useState('');
+  const [streakBonus, setStreakBonus] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0);
 
   const getRandomWord = () => {
     const randomWord = words[Math.floor(Math.random() * words.length)];
@@ -67,7 +72,7 @@ const LexIQWordGame: React.FC = () => {
     // eslint-disable-next-line
   }, [gameStatus]);
 
-  const handleGuess = (letter: string) => {
+  const handleGuess = async (letter: string) => {
     if (gameStatus !== 'playing' || !currentWord) return;
 
     const newGuessedLetters = new Set(guessedLetters);
@@ -93,6 +98,21 @@ const LexIQWordGame: React.FC = () => {
         const newScore = score + 50 + attemptBonus;
         setScore(newScore);
         setStreak(streak + 1);
+        
+        // Update streak in database
+        if (currentUser) {
+          try {
+            const streakResult = await userService.completeQuiz(currentUser.uid, newScore, 'lexiq-word');
+            if (streakResult.streakUpdated) {
+              setStreakMessage(streakResult.message);
+              setStreakBonus(streakResult.streakBonus);
+              setCurrentStreak(streakResult.newStreak);
+              setShowStreakNotification(true);
+            }
+          } catch (error) {
+            console.error('Error updating streak:', error);
+          }
+        }
       }
     }
   };
@@ -185,6 +205,15 @@ const LexIQWordGame: React.FC = () => {
           </div>
         )}
       </div>
+      {showStreakNotification && (
+        <StreakNotification
+          message={streakMessage}
+          streak={currentStreak}
+          bonus={streakBonus}
+          isVisible={showStreakNotification}
+          onClose={() => setShowStreakNotification(false)}
+        />
+      )}
     </div>
   );
 };

@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, ReactNode } from 'react';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { userService } from '../../services';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../../firebase/config';
 
+interface AdminRouteProps {
+  children: ReactNode;
+}
+
 // Component to protect admin routes
-const AdminRoute: React.FC = () => {
+const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,7 +119,7 @@ const AdminRoute: React.FC = () => {
     );
   }
   
-  return isAdmin ? <Outlet /> : <Navigate to="/unauthorized" replace />;
+  return isAdmin ? <>{children}</> : <Navigate to="/unauthorized" replace />;
 };
 
 export default AdminRoute; 
