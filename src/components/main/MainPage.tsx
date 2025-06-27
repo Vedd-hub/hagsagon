@@ -53,7 +53,7 @@ const LogoutIcon = () => (
 const constitutionArticles = [
   {
     id: 1,
-    title: 'Article 14: Right to Equality',
+    title: 'Article 14jhblhvbljawfn: Right to Equality',
     subtitle: 'Equality before law and equal protection of laws'
   },
   {

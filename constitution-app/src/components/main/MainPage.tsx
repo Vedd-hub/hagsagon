@@ -7,8 +7,8 @@ import gsap from 'gsap';
 const constitutionArticles = [
   {
     id: 1,
-    title: 'Part I',
-    subtitle: 'Union and its Territory',
+    title: 'Part II',
+    subtitle: 'Union and uisdgcibuvyhfnv its Territory',
     content: 'Details the territory of India, admission, establishment or formation of new States, and alteration of areas, boundaries or names of existing States.',
     image: 'https://images.unsplash.com/photo-1575505586569-646b2ca898fc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
   },
