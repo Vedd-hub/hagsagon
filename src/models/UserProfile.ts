@@ -21,4 +21,13 @@ export interface UserProfile {
   dailyNotifications?: boolean;
   soundEffects?: boolean;
   profession?: string;
+  quizzes?: {
+    [quizId: string]: {
+      currentQuestion: number;
+      answers: number[];
+      score: number;
+      finished: boolean;
+    };
+  };
+  photoURL?: string; // URL to the user's profile picture
 } 

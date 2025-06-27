@@ -25,7 +25,7 @@ const AdminLayout: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md">
+      <div className="w-64 bg-white shadow-md overflow-y-auto fixed top-0 left-0 h-full z-[1000]">
         <div className="p-4 border-b">
           <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
         </div>
@@ -71,7 +71,7 @@ const AdminLayout: React.FC = () => {
       </div>
       
       {/* Main content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto ml-64">
         <header className="bg-white shadow">
           <div className="px-4 py-6 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-bold text-gray-900">

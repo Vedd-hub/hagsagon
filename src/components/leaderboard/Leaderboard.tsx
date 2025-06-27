@@ -68,14 +68,14 @@ const Leaderboard: React.FC = () => {
           ) : (
             <div className="divide-y divide-[#f5e1a0]/20">
               {users.map((user, index) => (
-                <div key={user.uid} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
+                <div key={user.uid || index} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white font-bold text-lg border-2 border-[#f5e1a0]/30">
                       {index + 1}
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-[#f5e1a0]">{user.username}</div>
-                      <div className="text-sm text-white/60">Level {user.level}</div>
+                      <div className="text-xl font-bold text-[#f5e1a0]">{user.username || 'User'}</div>
+                      <div className="text-sm text-white/60">Level {user.level || 1}</div>
                     </div>
                   </div>
                   <div className="text-right">

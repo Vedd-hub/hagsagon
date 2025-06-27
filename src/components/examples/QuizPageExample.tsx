@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Quiz } from '../../models/Quiz';
 import { firestoreService } from '../../services';
 import { where, orderBy } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 const QuizPageExample: React.FC = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -44,6 +45,11 @@ const QuizPageExample: React.FC = () => {
           <h2 className="text-2xl font-serif font-bold text-white mb-6">
             Available Quizzes
           </h2>
+          <Link to="/quizzes">
+            <button className="mb-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-semibold">
+              Go to Public Quizzes
+            </button>
+          </Link>
           
           {loading ? (
             <div className="text-center py-8">

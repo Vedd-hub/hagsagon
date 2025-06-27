@@ -1,10 +1,14 @@
-import { firestoreService } from './index';
+import { FirestoreService } from './firestore.service';
 import { auth } from '../firebase/config';
 import { UserProfile } from '../models/UserProfile';
 import { getUserData } from './auth.service';
+import { storage } from '../firebase/config';
+import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 
 // Admin email for role assignment
 const ADMIN_EMAIL = 'vedtheadmin@gmail.com';
+
+const firestoreService = new FirestoreService();
 
 export class UserService {
   private readonly COLLECTION_NAME = 'users';
@@ -406,5 +410,99 @@ export class UserService {
     return this.updateUserProfile(uid, {
       gamesPlayed: user.gamesPlayed + 1
     });
+  }
+
+  /**
+   * Compress image before upload
+   */
+  private compressImage(file: File): Promise<File> {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Reduce maximum dimensions for faster upload
+        const maxWidth = 300;
+        const maxHeight = 300;
+        
+        let { width, height } = img;
+        
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.6 // Reduce quality to 60% for faster upload
+        );
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  /**
+   * Upload a profile picture and update the user's photoURL
+   */
+  async uploadProfilePicture(uid: string, file: File): Promise<string> {
+    try {
+      console.log('Starting image upload for user:', uid);
+      
+      // Check file size before compression
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        throw new Error('File size too large. Please select an image smaller than 10MB.');
+      }
+      
+      // Compress image first
+      console.log('Compressing image...');
+      const compressedFile = await this.compressImage(file);
+      console.log('Image compressed. Original size:', file.size, 'Compressed size:', compressedFile.size);
+      
+      const storageRef = ref(storage, `profile_pictures/${uid}`);
+      console.log('Uploading to Firebase Storage...');
+      await uploadBytes(storageRef, compressedFile);
+      
+      console.log('Getting download URL...');
+      const url = await getDownloadURL(storageRef);
+      
+      console.log('Updating user profile...');
+      await this.updateUserProfile(uid, { photoURL: url });
+      
+      console.log('Profile picture upload completed successfully');
+      return url;
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Failed to upload image. Please try again.');
+    }
   }
 } 

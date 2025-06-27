@@ -1,80 +1,106 @@
-import React from 'react';
-import { AuthProvider } from './contexts/AuthContext';
-import { BadgeProvider } from './contexts/BadgeContext';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+
+// Eagerly load critical components
 import LandingPage from './components/landing/LandingPage';
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/main/MainLayout';
-import MainPage from './components/main/MainPage';
-import LearnPageExample from './components/examples/LearnPageExample';
-import QuizPageExample from './components/examples/QuizPageExample';
-import GamesPage from './components/games/GamesPage';
-import ConstitutionChronicles from './components/games/ConstitutionChronicles';
-import Leaderboard from './components/leaderboard/Leaderboard';
-import CommunityPageExample from './components/examples/CommunityPageExample';
-import ProfilePageExample from './components/examples/ProfilePageExample';
-import AnnouncementPageExample from './components/examples/AnnouncementPageExample';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminRoute from './components/admin/AdminRoute';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorPage from './pages/ErrorPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import AdminRoute from './components/admin/AdminRoute';
+import AdminLayout from './components/admin/AdminLayout';
+import QuizListPublic from './components/quizzes/QuizListPublic';
+import ProfilePageExample from './components/examples/ProfilePageExample';
+import CommunityPageExample from './components/examples/CommunityPageExample';
+import Leaderboard from './components/leaderboard/Leaderboard';
 
-// Game Components
-import ArticleHunt from './components/games/ArticleHunt';
-import LexIQWordGame from './components/games/LexIQWordGame';
-import TimelineChallenge from './components/games/TimelineChallenge';
+// Lazy load feature components
+const MainPage = lazy(() => import('./components/main/MainPage'));
+const GamesPage = lazy(() => import('./components/games/GamesPage'));
+const LexIQWordGame = lazy(() => import('./components/games/LexIQWordGame'));
+const ConstitutionChronicles = lazy(() => import('./components/games/ConstitutionChronicles'));
+const TimelineChallenge = lazy(() => import('./components/games/TimelineChallenge'));
+const WhoSaidIt = lazy(() => import('./components/games/WhoSaidIt'));
+const ArticleHunt = lazy(() => import('./components/games/ArticleHunt'));
+const ChaptersPage = lazy(() => import('./pages/ChaptersPage'));
 
-// Admin Page Components
-import ChapterList from './components/admin/chapters/ChapterList';
-import ChapterForm from './components/admin/chapters/ChapterForm';
-import QuizList from './components/admin/quizzes/QuizList';
-import QuizForm from './components/admin/quizzes/QuizForm';
+// Lazy load battle components
+const BattleLobby = lazy(() => import('./components/battle/BattleLobby'));
+const BattleRoom = lazy(() => import('./components/battle/BattleRoom'));
+const BattleLayout = lazy(() => import('./components/battle/BattleLayout'));
 
-const App: React.FC = () => {
+// Lazy load admin components
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const ChapterList = lazy(() => import('./components/admin/chapters/ChapterList'));
+const ChapterForm = lazy(() => import('./components/admin/chapters/ChapterForm'));
+const QuizList = lazy(() => import('./components/admin/quizzes/QuizList'));
+const QuizForm = lazy(() => import('./components/admin/quizzes/QuizForm'));
+
+// Simple placeholder for missing pages
+const Placeholder = ({ label }: { label: string }) => <div style={{ color: '#fff', padding: 40, fontSize: 32 }}>Coming soon: {label}</div>;
+
+function App() {
   return (
     <AuthProvider>
-      <BadgeProvider>
+      <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/404" element={<ErrorPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
-          {/* Protected Routes inside Main Layout */}
+          
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/main" element={<MainPage />} />
-            <Route path="/learn" element={<LearnPageExample />} />
-            <Route path="/quiz" element={<QuizPageExample />} />
             <Route path="/games" element={<GamesPage />} />
-            <Route path="/games/article-hunt" element={<ArticleHunt />} />
-            <Route path="/games/lexiq-word" element={<LexIQWordGame />} />
-            <Route path="/games/timeline-challenge" element={<TimelineChallenge />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/games/lex-iq" element={<LexIQWordGame />} />
             <Route path="/games/constitution-chronicles" element={<ConstitutionChronicles />} />
-            <Route path="/leaderboard/:gameId" element={<Leaderboard />} />
-            <Route path="/community" element={<CommunityPageExample />} />
-            <Route path="/profile" element={<ProfilePageExample />} />
-            <Route path="/announcements" element={<AnnouncementPageExample />} />
-          </Route>
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/chapters" element={<AdminRoute><ChapterList /></AdminRoute>} />
-          <Route path="/admin/chapters/:id" element={<AdminRoute><ChapterForm /></AdminRoute>} />
-          <Route path="/admin/chapters/new" element={<AdminRoute><ChapterForm /></AdminRoute>} />
-          <Route path="/admin/quizzes" element={<AdminRoute><QuizList /></AdminRoute>} />
-          <Route path="/admin/quizzes/:id" element={<AdminRoute><QuizForm /></AdminRoute>} />
-          <Route path="/admin/quizzes/new" element={<AdminRoute><QuizForm /></AdminRoute>} />
+            <Route path="/games/timeline-challenge" element={<TimelineChallenge />} />
+            <Route path="/games/who-said-it" element={<WhoSaidIt />} />
+            <Route path="/games/article-hunt" element={<ArticleHunt />} />
+            <Route path="/learn" element={<ChaptersPage />} />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/404" replace />} />
+            {/* Battle Routes */}
+            <Route 
+              path="/battle" 
+              element={<Navigate to="/main" replace />} 
+            />
+            <Route 
+              path="/battle/:battleId" 
+              element={
+                <BattleLayout>
+                  <BattleRoom />
+                </BattleLayout>
+              } 
+            />
+            <Route path="/profile" element={<ProfilePageExample />} />
+            <Route path="/community" element={<CommunityPageExample />} />
+            <Route path="/leaderboard/constitution-chronicles" element={<Leaderboard />} />
+          </Route>
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="chapters" element={<ChapterList />} />
+            <Route path="chapters/new" element={<ChapterForm />} />
+            <Route path="chapters/edit/:id" element={<ChapterForm />} />
+            <Route path="quizzes" element={<QuizList />} />
+            <Route path="quizzes/new" element={<QuizForm />} />
+            <Route path="quizzes/edit/:id" element={<QuizForm />} />
+          </Route>
+
+          <Route path="/quizzes" element={<QuizListPublic />} />
+          <Route path="/quiz" element={<Navigate to="/quizzes" replace />} />
+
+          <Route path="*" element={<ErrorPage />} />
         </Routes>
-      </BadgeProvider>
+      </Suspense>
     </AuthProvider>
   );
-};
+}
 
 export default App;

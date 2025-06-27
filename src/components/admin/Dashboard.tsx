@@ -69,12 +69,12 @@ const Dashboard: React.FC = () => {
   return (
     <div>
       {/* Welcome */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
+      {/* <div className="bg-white shadow rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Welcome, {adminUser?.username || 'Admin'}</h2>
         <p className="text-gray-600">
           You are logged in as an administrator with full access to manage content.
         </p>
-      </div>
+      </div> */}
       
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">

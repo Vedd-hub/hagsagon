@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services';
@@ -20,6 +20,9 @@ const ProfilePageExample: React.FC = () => {
   const [newUsername, setNewUsername] = useState(userProfile?.username || '');
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [savingUsername, setSavingUsername] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profession options
   const professionOptions = [
@@ -60,11 +63,11 @@ const ProfilePageExample: React.FC = () => {
             console.log("ProfilePage: No profile found, creating a new one");
             // Create a basic profile with ALL required fields
             const now = Date.now();
-            const defaultProfile = {
-              uid: currentUser.uid, // Important: Include the user ID
-              username: currentUser.displayName || `User_${currentUser.uid.substring(0, 5)}`,
+            const defaultProfile: UserProfile = {
+              uid: currentUser.uid,
+              username: currentUser.displayName || currentUser.email?.split('@')[0] || 'User',
               email: currentUser.email || '',
-              role: "user" as "user" | "admin", // Regular user role for standard users
+              role: 'user' as 'user',
               level: 1,
               badges: [],
               chaptersCompleted: [],
@@ -232,6 +235,37 @@ const ProfilePageExample: React.FC = () => {
     }
   };
 
+  // Profile picture upload handler
+  const handleProfilePicChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !e.target.files[0] || !userProfile) return;
+    
+    const file = e.target.files[0];
+    
+    // Check file size (5MB limit for better UX)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('File size too large. Please select an image smaller than 5MB.');
+      return;
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select a valid image file.');
+      return;
+    }
+    
+    setUploading(true);
+    setUploadError(null);
+    
+    try {
+      const url = await userService.uploadProfilePicture(userProfile.uid, file);
+      setUserProfile({ ...userProfile, photoURL: url });
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Handle various states
   if (loading) {
     return (
@@ -298,18 +332,58 @@ const ProfilePageExample: React.FC = () => {
         >
           <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start">
             {/* Profile Avatar */}
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#f5e1a0] to-[#f5e1a0]/50 flex items-center justify-center text-4xl border-4 border-[#f5e1a0]/30">
-                {userProfile.username ? userProfile.username.charAt(0).toUpperCase() : 'U'}
+            <div className="relative group">
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer relative w-32 h-32 group"
+              >
+                {userProfile.photoURL ? (
+                  <>
+                    <img
+                      src={userProfile.photoURL}
+                      alt="Profile"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-[#f5e1a0]/30 transition-all duration-200 group-hover:opacity-80"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-[#f5e1a0] text-sm font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      Change Photo
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#f5e1a0] to-[#f5e1a0]/50 flex items-center justify-center text-4xl border-4 border-[#f5e1a0]/30 transition-all duration-200 group-hover:opacity-80 relative">
+                    {userProfile.username ? userProfile.username.charAt(0).toUpperCase() : 'U'}
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-[#f5e1a0] text-sm font-medium opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      Change Photo
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="absolute -bottom-2 -right-2 bg-[#f5e1a0] text-[#0F172A] rounded-full px-2 py-1 text-xs font-bold">
                 Lvl {Math.floor(safeLevel)}
               </div>
+              <input
+                type="file"
+                accept="image/*"
+                capture="user"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleProfilePicChange}
+                disabled={uploading}
+              />
+              {uploading && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                  <div className="w-6 h-6 border-2 border-[#f5e1a0]/30 border-t-[#f5e1a0] rounded-full animate-spin"></div>
+                </div>
+              )}
+              {uploadError && (
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-red-400 text-xs">
+                  {uploadError}
+                </div>
+              )}
             </div>
 
             {/* Basic Info */}
             <div className="flex-1 text-center lg:text-left">
-              <h2 className="text-3xl font-serif font-bold text-white mb-2">{userProfile.username}</h2>
+              <h2 className="text-3xl font-serif font-bold text-white mb-2">{userProfile.username || 'User'}</h2>
               {profession && (
                 <div className="mb-3">
                   <span className="bg-[#f5e1a0]/20 px-3 py-1 rounded-full text-[#f5e1a0] text-sm">
@@ -321,13 +395,13 @@ const ProfilePageExample: React.FC = () => {
               
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
                 <div className="px-3 py-1 bg-[#f5e1a0]/20 rounded-full text-[#f5e1a0] text-sm flex items-center">
-                  <span className="mr-1">🔥</span> {userProfile.dailyQuizStreak} day streak
+                  <span className="mr-1">🔥</span> {userProfile.dailyQuizStreak || 0} day streak
                 </div>
                 <div className="px-3 py-1 bg-[#f5e1a0]/20 rounded-full text-[#f5e1a0] text-sm flex items-center">
-                  <span className="mr-1">🏆</span> {badges.length} badges
+                  <span className="mr-1">🏆</span> {badges.length || 0} badges
                 </div>
                 <div className="px-3 py-1 bg-[#f5e1a0]/20 rounded-full text-[#f5e1a0] text-sm flex items-center">
-                  <span className="mr-1">📚</span> {chaptersCompleted.length} chapters
+                  <span className="mr-1">📚</span> {chaptersCompleted.length || 0} chapters
                 </div>
               </div>
             </div>
@@ -395,7 +469,7 @@ const ProfilePageExample: React.FC = () => {
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Current Level</div>
                   <div className="flex items-end">
-                    <span className="text-3xl font-bold text-white">{Math.floor(safeLevel)}</span>
+                    <span className="text-3xl font-bold text-white">{Math.floor(safeLevel) || 1}</span>
                     <span className="text-[#f5e1a0] ml-2 mb-1">
                       {levelProgress.toFixed(0)}% to next
                     </span>
@@ -411,7 +485,7 @@ const ProfilePageExample: React.FC = () => {
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Daily Streak</div>
                   <div className="flex items-center">
-                    <span className="text-3xl font-bold text-white">{userProfile.dailyQuizStreak}</span>
+                    <span className="text-3xl font-bold text-white">{userProfile.dailyQuizStreak || 0}</span>
                     <span className="text-2xl ml-2">🔥</span>
                   </div>
                   <div className="mt-2 text-gray-400 text-sm">
@@ -423,15 +497,15 @@ const ProfilePageExample: React.FC = () => {
 
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Badge Status</div>
-                  <div className="text-2xl font-bold text-white">{getBadgeLevel(badges.length)}</div>
+                  <div className="text-2xl font-bold text-white">{getBadgeLevel(badges.length || 0)}</div>
                   <div className="mt-2 text-gray-400 text-sm">
-                    {badges.length} badges collected
+                    {badges.length || 0} badges collected
                   </div>
                 </div>
 
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Games Played</div>
-                  <div className="text-3xl font-bold text-white">{userProfile.gamesPlayed}</div>
+                  <div className="text-3xl font-bold text-white">{userProfile.gamesPlayed || 0}</div>
                   <div className="mt-2 text-gray-400 text-sm">
                     Interactive learning games
                   </div>
@@ -439,7 +513,7 @@ const ProfilePageExample: React.FC = () => {
 
                 <div className="bg-black/30 p-4 rounded-lg">
                   <div className="text-gray-400 text-sm mb-1">Chapters Completed</div>
-                  <div className="text-3xl font-bold text-white">{chaptersCompleted.length}</div>
+                  <div className="text-3xl font-bold text-white">{chaptersCompleted.length || 0}</div>
                   <div className="mt-2 text-gray-400 text-sm">
                     Learning modules finished
                   </div>
@@ -628,7 +702,7 @@ const ProfilePageExample: React.FC = () => {
                       <div className="flex gap-2 items-center">
                         <input
                           type="text"
-                          value={userProfile.username}
+                          value={userProfile.username || 'User'}
                           readOnly
                           className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none"
                         />
@@ -654,7 +728,7 @@ const ProfilePageExample: React.FC = () => {
                   <div>
                     <label className="block text-gray-400 text-sm mb-1">Your Role/Profession</label>
                     <select
-                      value={profession}
+                      value={profession || ''}
                       onChange={handleProfessionChange}
                       className="w-full bg-black/30 border border-gray-700 rounded-lg p-3 text-white focus:border-[#f5e1a0]/50 focus:outline-none"
                       style={{ color: 'white' }}

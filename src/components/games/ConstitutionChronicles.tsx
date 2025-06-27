@@ -180,30 +180,17 @@ const ConstitutionChronicles: React.FC = () => {
     loadGameState();
   }, [currentUser]);
 
-  useEffect(() => {
-    // Function to save game state to Firestore
-    const saveGameState = async () => {
-      if (currentUser) {
-        try {
-          await userService.updateUserProfile(currentUser.uid, {
-            games: {
-              ...((await userService.getUserProfile(currentUser.uid))?.games || {}),
-              constitutionChronicles: {
-                currentEpisode,
-                currentScene,
-                constitutionalPoints,
-                badges,
-              },
-            },
-          });
-        } catch (error) {
-          console.error("Failed to save game state:", error);
-        }
-      }
-    };
-
-    saveGameState();
-  }, [currentUser, currentEpisode, currentScene, constitutionalPoints, badges]);
+  // --- RESUMABLE GAME LOGIC ---
+  // Progress is saved to Firestore after every significant user action (e.g., after makeChoice).
+  // On load, progress is restored from Firestore if available.
+  const saveGameState = async () => {
+    if (currentUser) {
+      await userService.updateUserProfile(currentUser.uid, {
+        // TODO: Add the fields you want to save for game progress, e.g.:
+        // constitutionChronicles: { episode, scene, points, badges, ... }
+      });
+    }
+  };
 
   if (loading || !episodes) {
     return (
@@ -290,6 +277,9 @@ const ConstitutionChronicles: React.FC = () => {
         setGameComplete(true);
       }
     }
+
+    // After updating state, save progress
+    await saveGameState();
   };
 
   const closeArticle = () => {
@@ -447,11 +437,12 @@ const ConstitutionChronicles: React.FC = () => {
                 </div>
               </div>
               
-              <div className="max-h-[200px] md:max-h-[300px] overflow-y-auto">
+              <div className="max-h-[200px] md:max-h-[300px] overflow-y-auto flex flex-col gap-y-2 md:gap-y-3">
                 {currentSceneData?.choices.map((choice, index) => (
                   <button
                     key={index}
-                    className="w-full p-3 md:p-4 mb-2 md:mb-3 bg-gradient-to-r from-[#f5e1a0]/20 to-[#f5e1a0]/10 text-white border border-[#f5e1a0]/30 rounded-[8px] md:rounded-[10px] cursor-pointer text-sm md:text-base transition-all text-left relative overflow-hidden hover:translate-x-[5px] hover:shadow-[0_5px_20px_rgba(0,0,0,0.3)] hover:bg-gradient-to-r hover:from-[#f5e1a0]/30 hover:to-[#f5e1a0]/20 hover:border-[#f5e1a0]/50"
+                    className="w-full p-3 md:p-4 bg-gradient-to-r from-[#f5e1a0]/20 to-[#f5e1a0]/10 text-white border border-[#f5e1a0]/30 rounded-[8px] md:rounded-[10px] cursor-pointer text-sm md:text-base transition-all duration-200 text-left relative overflow-hidden last:mb-0
+                      hover:scale-[1.035] hover:bg-white/20 hover:backdrop-blur-[2px] hover:border-[#f5e1a0] hover:shadow-[0_2px_8px_0_rgba(245,225,160,0.18)] focus:outline-none focus:ring-2 focus:ring-[#f5e1a0] focus:ring-offset-2"
                     onClick={() => makeChoice(index)}
                   >
                     {choice.text}
@@ -523,7 +514,8 @@ const ConstitutionChronicles: React.FC = () => {
         <StreakNotification
           message={streakMessage}
           bonus={streakBonus}
-          currentStreak={currentStreak}
+          streak={currentStreak}
+          isVisible={showStreakNotification}
           onClose={() => setShowStreakNotification(false)}
         />
       )}

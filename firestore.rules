@@ -19,9 +19,8 @@ service cloud.firestore {
     
     // Users collection rules
     match /users/{userId} {
-      // Users can read and write their own profiles
-      // Admins can read all user profiles but can only modify admin-specific fields
-      allow read: if isUser(userId) || isAdmin();
+      // Allow all authenticated users to read all user profiles
+      allow read: if isAuth();
       allow create, update: if isUser(userId) || isAdmin();
       allow delete: if isAdmin();
     }
@@ -56,6 +55,12 @@ service cloud.firestore {
       // Only admins can create, update or delete
       allow read: if true;
       allow write: if isAdmin();
+    }
+    
+    // Battles collection rules
+    match /battles/{battleId} {
+      allow create, read, update: if isAuth();
+      allow delete: if isAdmin();
     }
     
     // Default deny all other access

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import QuizListPublic from '../quizzes/QuizListPublic';
 
 const Gold = '#f5e1a0';
 const CardBg = 'bg-black/40 backdrop-blur-md';
@@ -80,6 +81,9 @@ const MainPage: React.FC = () => {
   const { currentUser, userData, loading: authLoading, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(3);
+  const [showAnnouncements, setShowAnnouncements] = useState(false);
+  const announcementsRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   const [announcements] = useState<Announcement[]>([
     { id: 1, title: 'New Feature: Daily Quizzes', content: 'Test your knowledge with our new daily quiz feature!', date: '2025-05-18', isNew: true },
@@ -103,6 +107,13 @@ const MainPage: React.FC = () => {
       navigate('/');
     } catch (error) {
       console.error('Failed to log out', error);
+    }
+  };
+
+  const toggleAnnouncements = () => {
+    setShowAnnouncements(!showAnnouncements);
+    if (!showAnnouncements && unreadAnnouncements > 0) {
+      setUnreadAnnouncements(0);
     }
   };
 
@@ -146,68 +157,139 @@ const MainPage: React.FC = () => {
       background: '#232b39',
     }}>
       {/* Welcome Bar - responsive positioning */}
-      <div className="fixed md:left-64 top-0 right-0 z-10 h-16 flex items-center px-4 md:px-8" style={{background: '#1a2233', borderBottom: '1px solid rgba(255,255,255,0.08)'}}>
-        <h1 className="font-playfair text-lg md:text-xl lg:text-2xl font-bold text-left leading-tight m-0">
-          <span className="text-white">Welcome </span>
-          <span className="text-[#f5e1a0]">{userName}</span>
-        </h1>
-      </div>
+      {!(location.pathname === '/quiz' || location.pathname.startsWith('/quiz/')) && (
+        <div className="fixed top-0 left-0 md:left-64 right-0 z-10 h-16 flex items-center px-4 md:px-8" style={{background: '#1a2233', borderBottom: '1px solid rgba(255,255,255,0.08)'}}>
+          <div className="flex justify-between items-center w-full h-full">
+            <div className="flex items-center gap-4">
+              <img src={avatarUrl} alt="User avatar" className="w-10 h-10 rounded-full border-2 border-[#f5e1a0]/60 shadow" />
+              <div className="flex flex-col justify-center">
+                <span className="text-white text-base md:text-lg font-semibold leading-tight">Welcome, <span className="text-[#f5e1a0] font-bold">{userName}</span></span>
+                <span className="text-xs md:text-sm text-white/60 mt-0.5">Glad to see you back!</span>
+              </div>
+            </div>
+            {/* Bell icon for announcements */}
+            <div className="relative ml-4">
+              <button
+                onClick={toggleAnnouncements}
+                className="relative p-2 text-white hover:text-[#f5e1a0] transition-colors rounded-full hover:bg-white/10"
+                aria-label="Announcements"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="#f5e1a0">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadAnnouncements > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadAnnouncements}
+                  </span>
+                )}
+              </button>
+              {/* Announcements Dropdown */}
+              {showAnnouncements && (
+                <div ref={announcementsRef} className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-50">
+                  <div className="p-3 border-b border-gray-700 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-white">Announcements</h3>
+                    <button
+                      onClick={() => setShowAnnouncements(false)}
+                      className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700 transition-colors"
+                      aria-label="Close announcements"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  {announcements.length > 0 ? (
+                    <ul className="divide-y divide-gray-700">
+                      {announcements.map((announcement) => (
+                        <li key={announcement.id} className="p-3 hover:bg-gray-700 transition-colors">
+                          <div className="flex items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium text-white">{announcement.title}</h4>
+                                {announcement.isNew && (
+                                  <span className="inline-block h-2 w-2 bg-red-500 rounded-full ml-2"></span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-300 mt-1">{announcement.content}</p>
+                              <span className="text-xs text-gray-400 mt-1 block">{new Date(announcement.date).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="p-4 text-center text-gray-400">
+                      No announcements yet
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <main className="flex-1 pt-0 px-4 md:px-6 lg:px-10 pb-4 md:pb-10 bg-transparent max-w-6xl mx-auto w-full mt-16">
-        {/* Top Divider Line */}
-        <div className="w-full h-px bg-white/10 mb-4 md:mb-6" />
-        {/* Progress Bar (full width) */}
-        <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow flex flex-col md:flex-row items-start md:items-center gap-4 mb-6 md:mb-8 border border-white/10 w-full">
-          <div className="flex-1 w-full">
-            <div className="text-base md:text-lg font-serif font-extrabold text-white mb-2">Your Progress</div>
-            <div className="text-sm md:text-base text-white/70 mb-2">Completed chapters: {completedChapters}/{totalChapters}</div>
-            <div className="w-full bg-white/10 rounded-full h-2">
-              <div className="bg-[#f5e1a0] h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+        {location.pathname === '/quiz' ? (
+          <QuizListPublic />
+        ) : (
+          <>
+            {/* Top Divider Line */}
+            <div className="w-full h-px bg-white/10 mb-4 md:mb-6" />
+            {/* Progress Bar (full width) */}
+            <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow flex flex-col md:flex-row items-start md:items-center gap-4 mb-6 md:mb-8 border border-white/10 w-full">
+              <div className="flex-1 w-full">
+                <div className="text-base md:text-lg font-serif font-extrabold text-white mb-2">Your Progress</div>
+                <div className="text-sm md:text-base text-white/70 mb-2">Completed chapters: {completedChapters}/{totalChapters}</div>
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div className="bg-[#f5e1a0] h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col items-end min-w-[60px] md:min-w-[70px]">
+                <span className="text-xl md:text-2xl font-serif font-extrabold text-[#f5e1a0] leading-none">{Math.round(progressPercentage)}%</span>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col items-end min-w-[60px] md:min-w-[70px]">
-            <span className="text-xl md:text-2xl font-serif font-extrabold text-[#f5e1a0] leading-none">{Math.round(progressPercentage)}%</span>
-          </div>
-        </div>
-        {/* Cards Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-10">
-          {/* Recent Activity */}
-          <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
-            <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Recent Activity</h2>
-            <ul className="space-y-2 text-sm md:text-base font-normal">
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-green-400 rounded-full mr-2"></span>Completed Preamble module</span><span className="text-xs text-white/50">2 days ago</span></li>
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-blue-400 rounded-full mr-2"></span>Quiz on Fundamental Rights</span><span className="text-xs text-white/50">5 days ago</span></li>
-              <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-purple-400 rounded-full mr-2"></span>Started Article III</span><span className="text-xs text-white/50">1 week ago</span></li>
-            </ul>
-          </div>
-          {/* Achievements */}
-          <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
-            <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Achievements</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🎉</span> First Login</div>
-              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">📄</span> Complete Preamble</div>
-              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🏆</span> Perfect Quiz</div>
-              <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">⚖️</span> Fundamental Rights Master</div>
+            {/* Cards Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-10">
+              {/* Recent Activity */}
+              <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
+                <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Recent Activity</h2>
+                <ul className="space-y-2 text-sm md:text-base font-normal">
+                  <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-green-400 rounded-full mr-2"></span>Completed Preamble module</span><span className="text-xs text-white/50">2 days ago</span></li>
+                  <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-blue-400 rounded-full mr-2"></span>Quiz on Fundamental Rights</span><span className="text-xs text-white/50">5 days ago</span></li>
+                  <li className="flex items-center justify-between text-white/90"><span><span className="inline-block w-2 md:w-3 h-2 md:h-3 bg-purple-400 rounded-full mr-2"></span>Started Article III</span><span className="text-xs text-white/50">1 week ago</span></li>
+                </ul>
+              </div>
+              {/* Achievements */}
+              <div className="bg-white/5 rounded-xl md:rounded-2xl p-4 md:p-6 shadow border border-white/10 flex flex-col justify-between min-h-[200px] md:min-h-[220px]">
+                <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Achievements</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🎉</span> First Login</div>
+                  <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">📄</span> Complete Preamble</div>
+                  <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">🏆</span> Perfect Quiz</div>
+                  <div className="flex items-center gap-2 text-white/80 text-base md:text-lg font-serif font-semibold opacity-70"><span className="text-xl md:text-2xl">⚖️</span> Fundamental Rights Master</div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        {/* Continue Learning */}
-        <div className="mt-8 md:mt-10">
-          <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Continue Learning</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
-              <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" alt="Union and its Territory" className="h-24 md:h-32 w-full object-cover" />
-              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part I: The Union and its Territory</div>
+            {/* Continue Learning */}
+            <div className="mt-8 md:mt-10">
+              <h2 className="text-xl md:text-2xl font-serif font-extrabold text-white mb-4 tracking-tight">Continue Learning</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
+                  <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" alt="Union and its Territory" className="h-24 md:h-32 w-full object-cover" />
+                  <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part I: The Union and its Territory</div>
+                </div>
+                <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
+                  <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Citizenship" className="h-24 md:h-32 w-full object-cover" />
+                  <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part II: Citizenship</div>
+                </div>
+                <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col sm:col-span-2 lg:col-span-1">
+                  <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Fundamental Rights" className="h-24 md:h-32 w-full object-cover" />
+                  <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part III: Fundamental Rights</div>
+                </div>
+              </div>
             </div>
-            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col">
-              <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Citizenship" className="h-24 md:h-32 w-full object-cover" />
-              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part II: Citizenship</div>
-            </div>
-            <div className="bg-white/10 rounded-xl md:rounded-2xl overflow-hidden shadow flex flex-col sm:col-span-2 lg:col-span-1">
-              <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Fundamental Rights" className="h-24 md:h-32 w-full object-cover" />
-              <div className="p-3 md:p-4 text-white font-serif font-semibold text-base md:text-lg">Part III: Fundamental Rights</div>
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </main>
     </div>
   );

@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "iitm-hackathon-42f92"
-  }
+    "default": "iitm-hackathon-42f92",
+    "production": "iitm-hackathon-42f92",
+    "hosting": "iitm-hackathon-42f92"
+  },
+  "targets": {},
+  "etags": {}
 }

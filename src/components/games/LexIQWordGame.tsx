@@ -187,18 +187,30 @@ const LexIQWordGame: React.FC = () => {
           ))}
         </div>
         {gameStatus !== 'playing' && (
-          <div className="text-center">
-            <div className={`p-4 rounded-xl mb-4 font-bold text-lg shadow-lg
-              ${gameStatus === 'won' ? 'bg-[#f5e1a0]/20 text-[#f5e1a0] border-l-4 border-[#f5e1a0]' : 'bg-red-100 text-red-800 border-l-4 border-red-500'}`}
+          <div className="text-center flex flex-col items-center justify-center">
+            <div
+              className={`p-4 rounded-xl mb-4 font-bold text-lg shadow-lg w-full max-w-xs sm:max-w-md mx-auto flex flex-col items-center
+                ${gameStatus === 'won'
+                  ? 'bg-[#f5e1a0]/20 text-[#f5e1a0] border-l-4 border-[#f5e1a0]'
+                  : 'bg-red-100 text-red-800 border-l-4 border-red-500'}
+              `}
             >
-              <p className="text-2xl mb-2">
+              <p className="text-2xl mb-2 font-extrabold tracking-wide">
                 {gameStatus === 'won' ? 'Congratulations!' : 'Game Over!'}
               </p>
-              <p className="text-white/80">The word was: <span className="text-[#f5e1a0]">{currentWord?.term}</span></p>
+              <div className="flex flex-col items-center w-full">
+                <span className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mb-1 font-semibold">The word was:</span>
+                <span
+                  className="inline-block px-6 py-3 rounded-full bg-[#ffe066] text-[#232b39] text-2xl sm:text-3xl font-extrabold shadow-lg border-2 border-[#f5e1a0] mt-1 mb-2 animate-pulse"
+                  style={{ letterSpacing: '0.15em' }}
+                >
+                  {currentWord?.term}
+                </span>
+              </div>
             </div>
             <button
               onClick={getRandomWord}
-              className="bg-[#f5e1a0] text-[#181e26] font-bold px-6 py-2 rounded-lg shadow hover:bg-[#ffe08a] transition-all"
+              className="bg-[#f5e1a0] text-[#181e26] font-bold px-6 py-2 rounded-lg shadow hover:bg-[#ffe08a] transition-all w-full max-w-xs sm:max-w-md mx-auto"
             >
               Next Word
             </button>

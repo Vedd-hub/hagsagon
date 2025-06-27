@@ -181,10 +181,10 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Welcome Title */}
-        <div className="mb-8 z-0">
+        {/* <div className="mb-8 z-0">
           <h1 className="text-2xl md:text-3xl font-bold text-primary mb-2">Welcome, {adminUser?.username || 'Admin'}!</h1>
           <p className="text-gray-500 text-lg">Here's a quick overview of your platform's activity and shortcuts to manage content.</p>
-        </div>
+        </div> */}
       </main>
     </div>
   );

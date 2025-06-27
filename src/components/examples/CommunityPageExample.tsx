@@ -358,6 +358,26 @@ const CommunityPageExample: React.FC = () => {
 
   // Wait for profile
   if (!userProfile) {
+    // Provide a robust fallback profile to prevent UI breakage
+    const fallbackProfile = {
+      uid: currentUser?.uid || 'unknown',
+      username: currentUser?.displayName || currentUser?.email?.split('@')[0] || 'User',
+      email: currentUser?.email || '',
+      role: 'user' as 'user',
+      level: 1,
+      badges: [],
+      chaptersCompleted: [],
+      dailyQuizStreak: 0,
+      gamesPlayed: 0,
+      lexIQScore: 0,
+      lastLogin: Date.now(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      dailyNotifications: true,
+      soundEffects: true,
+      profession: ''
+    };
+    setUserProfile(fallbackProfile);
     return (
       <div className="text-center text-white p-8">
         <h2 className="text-2xl font-bold mb-4">Setting Up Your Profile</h2>
@@ -442,12 +462,12 @@ const CommunityPageExample: React.FC = () => {
                 </div>
                 <h2 className="text-xl font-bold text-[#f5e1a0]">{userProfile.username}</h2>
                 <p className="text-sm text-white/60 mb-2">{userProfile.profession || 'Constitutional Enthusiast'}</p>
-                <div className="text-lg text-white font-semibold">Level {userProfile.level}</div>
+                <div className="text-lg text-white font-semibold">Level {userProfile.level || 1}</div>
                 <div className="w-full bg-white/10 h-1.5 rounded-full mt-1 mb-3">
                   <div className="bg-[#f5e1a0] h-1.5 rounded-full" style={{ width: `${(userProfile.level % 10) * 10}%` }}></div>
                 </div>
                 <div className="flex flex-wrap justify-center">
-                  {userProfile.badges.length > 0 ? (
+                  {userProfile.badges && userProfile.badges.length > 0 ? (
                     userProfile.badges.map(badge => <BadgeDisplay key={badge} badgeName={badge} size="sm" />)
                   ) : (
                     <p className="text-xs text-white/50">No badges yet. Play games to earn them!</p>
